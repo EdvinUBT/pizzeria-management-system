@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const db = require('./config/db');
+const createTables = require('./models/database');
 
 // Konfigurimi i variablave te mjedisit nga .env
 dotenv.config();
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Serveri eshte duke u ekzekutuar ne portin ${PORT}`);
+    await createTables();
 });
