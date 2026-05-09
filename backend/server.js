@@ -13,10 +13,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Importo rutat
+const authRoutes = require('./routes/authRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
 });
+
+// Rutat e autentifikimit
+app.use('/api/auth', authRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
