@@ -18,6 +18,22 @@ const authRoutes = require('./routes/authRoutes');
 
 const kategoriteRoutes = require('./routes/kategoriteRoutes');
 
+const produktetRoutes = require('./routes/produktetRoutes');
+
+const perberesitRoutes = require('./routes/perberesitRoutes');
+
+const klientetRoutes = require('./routes/klientetRoutes');
+
+const porositeRoutes = require('./routes/porositeRoutes');
+
+const punonjesitRoutes = require('./routes/punonjesitRoutes');
+
+const dergesatRoutes = require('./routes/dergesatRoutes');
+
+const menyteRoutes = require('./routes/menyteRoutes');
+
+const vleresimetRoutes = require('./routes/vleresimetRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -27,6 +43,22 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/kategorite', kategoriteRoutes);
+
+app.use('/api/produktet', produktetRoutes);
+
+app.use('/api/perberesit', perberesitRoutes);
+
+app.use('/api/klientet', klientetRoutes);
+
+app.use('/api/porosite', porositeRoutes);
+
+app.use('/api/punonjesit', punonjesitRoutes);
+
+app.use('/api/dergesat', dergesatRoutes);
+
+app.use('/api/menyte', menyteRoutes);
+
+app.use('/api/vleresimet', vleresimetRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
