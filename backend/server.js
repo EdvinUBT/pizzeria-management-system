@@ -34,6 +34,10 @@ const menyteRoutes = require('./routes/menyteRoutes');
 
 const vleresimetRoutes = require('./routes/vleresimetRoutes');
 
+const produktPerberesitRoutes = require('./routes/produktPerberesitRoutes');
+
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -59,6 +63,10 @@ app.use('/api/dergesat', dergesatRoutes);
 app.use('/api/menyte', menyteRoutes);
 
 app.use('/api/vleresimet', vleresimetRoutes);
+
+app.use('/api/produkt-perberesit', produktPerberesitRoutes);
+
+app.use('/api/dashboard', dashboardRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
