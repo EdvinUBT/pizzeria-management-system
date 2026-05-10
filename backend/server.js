@@ -16,6 +16,8 @@ app.use(express.json());
 // Importo rutat
 const authRoutes = require('./routes/authRoutes');
 
+const kategoriteRoutes = require('./routes/kategoriteRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -23,6 +25,8 @@ app.get('/', (req, res) => {
 
 // Rutat e autentifikimit
 app.use('/api/auth', authRoutes);
+
+app.use('/api/kategorite', kategoriteRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
