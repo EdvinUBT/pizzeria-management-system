@@ -308,8 +308,48 @@ const createTables = async () => {
         `);
         console.log('Tabela adresat u krijua me sukses!');
 
+        console.log('------------------------------------');
+        console.log('Te gjitha 20 tabelat u krijuan me sukses!');
+
+        // ==========================================
+        // INDEKSET PER PERFORMANCE
+        // ==========================================
+
+        const indekset = [
+            { tabela: 'users', emri: 'idx_users_email', kolona: 'email' },
+            { tabela: 'users', emri: 'idx_users_statusi', kolona: 'statusi' },
+            { tabela: 'klientet', emri: 'idx_klientet_email', kolona: 'email' },
+            { tabela: 'produktet', emri: 'idx_produktet_kategori', kolona: 'kategori_id' },
+            { tabela: 'produktet', emri: 'idx_produktet_aktive', kolona: 'aktive' },
+            { tabela: 'porosite', emri: 'idx_porosite_klient', kolona: 'klient_id' },
+            { tabela: 'porosite', emri: 'idx_porosite_statusi', kolona: 'statusi' },
+            { tabela: 'porosite', emri: 'idx_porosite_data', kolona: 'data_porosise' },
+            { tabela: 'detajet_porosise', emri: 'idx_detajet_porosi', kolona: 'porosi_id' },
+            { tabela: 'detajet_porosise', emri: 'idx_detajet_produkt', kolona: 'produkt_id' },
+            { tabela: 'dergesat', emri: 'idx_dergesat_porosi', kolona: 'porosi_id' },
+            { tabela: 'dergesat', emri: 'idx_dergesat_punonjes', kolona: 'punonjes_id' },
+            { tabela: 'dergesat', emri: 'idx_dergesat_statusi', kolona: 'statusi' },
+            { tabela: 'vleresimet', emri: 'idx_vleresimet_klient', kolona: 'klient_id' },
+            { tabela: 'vleresimet', emri: 'idx_vleresimet_porosi', kolona: 'porosi_id' },
+            { tabela: 'kuponat', emri: 'idx_kuponat_kodi', kolona: 'kodi' },
+            { tabela: 'adresat', emri: 'idx_adresat_klient', kolona: 'klient_id' },
+            { tabela: 'refresh_tokens', emri: 'idx_refresh_tokens_user', kolona: 'user_id' },
+            { tabela: 'refresh_tokens', emri: 'idx_refresh_tokens_token', kolona: 'token(255)' }
+        ];
+
+        for (const idx of indekset) {
+            const [rows] = await db.query(
+                `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema = ? AND table_name = ? AND index_name = ?`,
+                [process.env.DB_NAME, idx.tabela, idx.emri]
+            );
+            if (rows[0].cnt === 0) {
+                await db.query(`CREATE INDEX ${idx.emri} ON ${idx.tabela}(${idx.kolona})`);
+            }
+        }
+        console.log('Te gjitha indekset u krijuan me sukses!');
+
         console.log('====================================');
-        console.log('TE GJITHA 20 TABELAT U KRIJUAN ME SUKSES!');
+        console.log('DATABAZA U KONFIGURUA PLOTESISHT!');
         console.log('====================================');
 
     } catch (error) {

@@ -48,6 +48,10 @@ const kuponatRoutes = require('./routes/kuponatRoutes');
 
 const adresatRoutes = require('./routes/adresatRoutes');
 
+const userClaimsRoutes = require('./routes/userClaimsRoutes');
+
+const userTokensRoutes = require('./routes/userTokensRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -87,6 +91,10 @@ app.use('/api/user-roles', userRolesRoutes);
 app.use('/api/kuponat', kuponatRoutes);
 
 app.use('/api/adresat', adresatRoutes);
+
+app.use('/api/user-claims', userClaimsRoutes);
+
+app.use('/api/user-tokens', userTokensRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
