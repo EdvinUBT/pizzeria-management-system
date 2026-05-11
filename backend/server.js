@@ -38,6 +38,12 @@ const produktPerberesitRoutes = require('./routes/produktPerberesitRoutes');
 
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
+const usersRoutes = require('./routes/usersRoutes');
+
+const rolesRoutes = require('./routes/rolesRoutes');
+
+const userRolesRoutes = require('./routes/userRolesRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -67,6 +73,12 @@ app.use('/api/vleresimet', vleresimetRoutes);
 app.use('/api/produkt-perberesit', produktPerberesitRoutes);
 
 app.use('/api/dashboard', dashboardRoutes);
+
+app.use('/api/users', usersRoutes);
+
+app.use('/api/roles', rolesRoutes);
+
+app.use('/api/user-roles', userRolesRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
