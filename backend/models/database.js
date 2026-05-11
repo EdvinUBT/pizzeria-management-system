@@ -269,8 +269,47 @@ const createTables = async () => {
         `);
         console.log('Tabela vleresimet u krijua me sukses!');
 
+        console.log('------------------------------------');
+        console.log('Te gjitha tabelat e picerise u krijuan me sukses!');
+
+        // ==========================================
+        // TABELAT SHTESE (KREATIVE)
+        // ==========================================
+
+        // 19. Tabela Kuponat
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS kuponat (
+                kupon_id INT AUTO_INCREMENT PRIMARY KEY,
+                kodi VARCHAR(50) NOT NULL UNIQUE,
+                zbritja_perqind DECIMAL(5, 2) NOT NULL,
+                zbritja_max DECIMAL(10, 2),
+                porosi_min DECIMAL(10, 2) DEFAULT 0,
+                data_fillimit DATE NOT NULL,
+                data_skadimit DATE NOT NULL,
+                perdorimet_max INT DEFAULT 1,
+                perdorimet_aktuale INT DEFAULT 0,
+                aktiv BOOLEAN DEFAULT TRUE
+            )
+        `);
+        console.log('Tabela kuponat u krijua me sukses!');
+
+        // 20. Tabela Adresat e Klienteve
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS adresat (
+                adrese_id INT AUTO_INCREMENT PRIMARY KEY,
+                klient_id INT NOT NULL,
+                emertimi VARCHAR(100) NOT NULL,
+                adresa TEXT NOT NULL,
+                qyteti VARCHAR(100),
+                kodi_postar VARCHAR(20),
+                eshte_default BOOLEAN DEFAULT FALSE,
+                FOREIGN KEY (klient_id) REFERENCES klientet(klient_id) ON DELETE CASCADE
+            )
+        `);
+        console.log('Tabela adresat u krijua me sukses!');
+
         console.log('====================================');
-        console.log('TE GJITHA 18 TABELAT U KRIJUAN ME SUKSES!');
+        console.log('TE GJITHA 20 TABELAT U KRIJUAN ME SUKSES!');
         console.log('====================================');
 
     } catch (error) {
