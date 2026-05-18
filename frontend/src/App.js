@@ -9,6 +9,7 @@ import Produktet from './pages/Produktet';
 import Porosite from './pages/Porosite';
 import Klientet from './pages/Klientet';
 import Punonjesit from './pages/Punonjesit';
+import Dergesat from './pages/Dergesat';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -67,6 +68,11 @@ const AppContent = () => {
         <Route path="/punonjesit" element={
           <PrivateRoute>
             <Punonjesit />
+          </PrivateRoute>
+        } />
+        <Route path="/dergesat" element={
+          <PrivateRoute>
+            <Dergesat />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
