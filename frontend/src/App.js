@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Kategorite from './pages/Kategorite';
+import Produktet from './pages/Produktet';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -43,6 +44,11 @@ const AppContent = () => {
         <Route path="/kategorite" element={
           <PrivateRoute>
             <Kategorite />
+          </PrivateRoute>
+        } />
+        <Route path="/produktet" element={
+          <PrivateRoute>
+            <Produktet />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
