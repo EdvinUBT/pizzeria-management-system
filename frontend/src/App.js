@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -35,9 +36,7 @@ const AppContent = () => {
         <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={
           <PrivateRoute>
-            <div className="container mt-4">
-              <h2>Dashboard - Se shpejti!</h2>
-            </div>
+            <Dashboard />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
