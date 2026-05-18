@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Kategorite from './pages/Kategorite';
 import Produktet from './pages/Produktet';
 import Porosite from './pages/Porosite';
+import Klientet from './pages/Klientet';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -55,6 +56,11 @@ const AppContent = () => {
         <Route path="/porosite" element={
           <PrivateRoute>
             <Porosite />
+          </PrivateRoute>
+        } />
+        <Route path="/klientet" element={
+          <PrivateRoute>
+            <Klientet />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
