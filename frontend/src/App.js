@@ -14,6 +14,7 @@ import Menyte from './pages/Menyte';
 import Kuponat from './pages/Kuponat';
 import Vleresimet from './pages/Vleresimet';
 import Users from './pages/Users';
+import Roles from './pages/Roles';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -97,6 +98,11 @@ const AppContent = () => {
         <Route path="/users" element={
           <PrivateRoute>
             <Users />
+          </PrivateRoute>
+        } />
+        <Route path="/roles" element={
+          <PrivateRoute>
+            <Roles />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
