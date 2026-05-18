@@ -12,6 +12,7 @@ import Punonjesit from './pages/Punonjesit';
 import Dergesat from './pages/Dergesat';
 import Menyte from './pages/Menyte';
 import Kuponat from './pages/Kuponat';
+import Vleresimet from './pages/Vleresimet';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -85,6 +86,11 @@ const AppContent = () => {
         <Route path="/kuponat" element={
           <PrivateRoute>
             <Kuponat />
+          </PrivateRoute>
+        } />
+        <Route path="/vleresimet" element={
+          <PrivateRoute>
+            <Vleresimet />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
