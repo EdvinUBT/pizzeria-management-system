@@ -10,6 +10,7 @@ import Porosite from './pages/Porosite';
 import Klientet from './pages/Klientet';
 import Punonjesit from './pages/Punonjesit';
 import Dergesat from './pages/Dergesat';
+import Menyte from './pages/Menyte';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -73,6 +74,11 @@ const AppContent = () => {
         <Route path="/dergesat" element={
           <PrivateRoute>
             <Dergesat />
+          </PrivateRoute>
+        } />
+        <Route path="/menyte" element={
+          <PrivateRoute>
+            <Menyte />
           </PrivateRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
