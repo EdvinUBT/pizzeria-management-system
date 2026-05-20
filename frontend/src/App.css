@@ -213,3 +213,14 @@ h2 {
 .footer a:hover {
   color: #ee5a5a;
 }
+
+/* Footer gjithmone ne fund */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}

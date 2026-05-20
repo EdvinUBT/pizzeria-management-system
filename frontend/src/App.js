@@ -85,29 +85,31 @@ const AppContent = () => {
   return (
     <Router>
       {user && <Navbar />}
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
-          <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/kategorite" element={<PrivateRoute><Kategorite /></PrivateRoute>} />
-          <Route path="/produktet" element={<PrivateRoute><Produktet /></PrivateRoute>} />
-          <Route path="/porosite" element={<AdminRoute><Porosite /></AdminRoute>} />
-          <Route path="/klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
-          <Route path="/punonjesit" element={<AdminRoute><Punonjesit /></AdminRoute>} />
-          <Route path="/dergesat" element={<AdminRoute><Dergesat /></AdminRoute>} />
-          <Route path="/menyte" element={<PrivateRoute><Menyte /></PrivateRoute>} />
-          <Route path="/kuponat" element={<AdminRoute><Kuponat /></AdminRoute>} />
-          <Route path="/vleresimet" element={<AdminRoute><Vleresimet /></AdminRoute>} />
-          <Route path="/users" element={<AdminOnlyRoute><Users /></AdminOnlyRoute>} />
-          <Route path="/roles" element={<AdminOnlyRoute><Roles /></AdminOnlyRoute>} />
-          <Route path="/perberesit" element={<AdminRoute><Perberesit /></AdminRoute>} />
-          <Route path="/produkt-perberesit" element={<AdminRoute><ProduktPerberesit /></AdminRoute>} />
-          <Route path="/adresat" element={<AdminRoute><Adresat /></AdminRoute>} />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <div className="main-content">
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
+            <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/kategorite" element={<PrivateRoute><Kategorite /></PrivateRoute>} />
+            <Route path="/produktet" element={<PrivateRoute><Produktet /></PrivateRoute>} />
+            <Route path="/porosite" element={<AdminRoute><Porosite /></AdminRoute>} />
+            <Route path="/klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
+            <Route path="/punonjesit" element={<AdminRoute><Punonjesit /></AdminRoute>} />
+            <Route path="/dergesat" element={<AdminRoute><Dergesat /></AdminRoute>} />
+            <Route path="/menyte" element={<PrivateRoute><Menyte /></PrivateRoute>} />
+            <Route path="/kuponat" element={<AdminRoute><Kuponat /></AdminRoute>} />
+            <Route path="/vleresimet" element={<AdminRoute><Vleresimet /></AdminRoute>} />
+            <Route path="/users" element={<AdminOnlyRoute><Users /></AdminOnlyRoute>} />
+            <Route path="/roles" element={<AdminOnlyRoute><Roles /></AdminOnlyRoute>} />
+            <Route path="/perberesit" element={<AdminRoute><Perberesit /></AdminRoute>} />
+            <Route path="/produkt-perberesit" element={<AdminRoute><ProduktPerberesit /></AdminRoute>} />
+            <Route path="/adresat" element={<AdminRoute><Adresat /></AdminRoute>} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </div>
       {user && <Footer />}
     </Router>
   );

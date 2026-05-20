@@ -36,10 +36,13 @@ const Navbar = () => {
                                 <Link className="nav-link" to="/produktet">Produktet</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/porosite">Porosite</Link>
+                                <Link className="nav-link" to="/menyte">Menyte</Link>
                             </li>
                             {(isAdmin() || isMenaxher()) && (
                                 <>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/porosite">Porosite</Link>
+                                    </li>
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/klientet">Klientet</Link>
                                     </li>
@@ -48,9 +51,6 @@ const Navbar = () => {
                                     </li>
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/dergesat">Dergesat</Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link className="nav-link" to="/menyte">Menyte</Link>
                                     </li>
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/kuponat">Kuponat</Link>
@@ -67,14 +67,19 @@ const Navbar = () => {
                                 </>
                             )}
                             {isAdmin() && (
-                                <li className="nav-item dropdown">
-                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <li className="nav-item dropdown" style={{ position: 'relative' }}>
+                                    <a className="nav-link dropdown-toggle" href="#!" role="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const menu = e.target.nextElementSibling;
+                                            menu.classList.toggle('show');
+                                        }}>
                                         Administrimi
                                     </a>
                                     <ul className="dropdown-menu dropdown-menu-dark">
-                                        <li><Link className="dropdown-item" to="/users">Perdoruesit</Link></li>
-                                        <li><Link className="dropdown-item" to="/roles">Rolet</Link></li>
-                                        <li><Link className="dropdown-item" to="/vleresimet">Vleresimet</Link></li>
+                                        <li><Link className="dropdown-item" to="/users" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Perdoruesit</Link></li>
+                                        <li><Link className="dropdown-item" to="/roles" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Rolet</Link></li>
+                                        <li><Link className="dropdown-item" to="/vleresimet" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Vleresimet</Link></li>
                                     </ul>
                                 </li>
                             )}
