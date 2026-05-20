@@ -40,6 +40,38 @@ const PrivateRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
+// Komponenti qe mbron rutat vetem per admin/menaxher
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to="/login" />;
+  if (!user.roles?.includes('admin') && !user.roles?.includes('menaxher')) {
+    return (
+      <div className="container mt-5 text-center">
+        <h3 className="text-danger">Qasja e Refuzuar!</h3>
+        <p className="text-muted">Nuk keni autorizim per kete faqe.</p>
+      </div>
+    );
+  }
+  return children;
+};
+
+// Komponenti vetem per admin
+const AdminOnlyRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to="/login" />;
+  if (!user.roles?.includes('admin')) {
+    return (
+      <div className="container mt-5 text-center">
+        <h3 className="text-danger">Qasja e Refuzuar!</h3>
+        <p className="text-muted">Vetem administratori ka qasje ketu.</p>
+      </div>
+    );
+  }
+  return children;
+};
+
 // Komponenti kryesor
 const AppContent = () => {
   const { user } = useAuth();
@@ -54,15 +86,15 @@ const AppContent = () => {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/kategorite" element={<PrivateRoute><Kategorite /></PrivateRoute>} />
           <Route path="/produktet" element={<PrivateRoute><Produktet /></PrivateRoute>} />
-          <Route path="/porosite" element={<PrivateRoute><Porosite /></PrivateRoute>} />
-          <Route path="/klientet" element={<PrivateRoute><Klientet /></PrivateRoute>} />
-          <Route path="/punonjesit" element={<PrivateRoute><Punonjesit /></PrivateRoute>} />
-          <Route path="/dergesat" element={<PrivateRoute><Dergesat /></PrivateRoute>} />
+          <Route path="/porosite" element={<AdminRoute><Porosite /></AdminRoute>} />
+          <Route path="/klientet" element={<AdminRoute><Klientet /></AdminRoute>} />
+          <Route path="/punonjesit" element={<AdminRoute><Punonjesit /></AdminRoute>} />
+          <Route path="/dergesat" element={<AdminRoute><Dergesat /></AdminRoute>} />
           <Route path="/menyte" element={<PrivateRoute><Menyte /></PrivateRoute>} />
-          <Route path="/kuponat" element={<PrivateRoute><Kuponat /></PrivateRoute>} />
-          <Route path="/vleresimet" element={<PrivateRoute><Vleresimet /></PrivateRoute>} />
-          <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />
-          <Route path="/roles" element={<PrivateRoute><Roles /></PrivateRoute>} />
+          <Route path="/kuponat" element={<AdminRoute><Kuponat /></AdminRoute>} />
+          <Route path="/vleresimet" element={<AdminRoute><Vleresimet /></AdminRoute>} />
+          <Route path="/users" element={<AdminOnlyRoute><Users /></AdminOnlyRoute>} />
+          <Route path="/roles" element={<AdminOnlyRoute><Roles /></AdminOnlyRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </Suspense>
