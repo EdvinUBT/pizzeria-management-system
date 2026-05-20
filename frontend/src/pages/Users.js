@@ -168,7 +168,7 @@ const Users = () => {
         <div className="container-fluid mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2><FaUserShield className="me-2 text-danger" />Perdoruesit</h2>
-                <button className="btn btn-danger" onClick={() => { setShowForm(!showForm); resetForm(); }}>
+                <button className="btn btn-danger" onClick={() => { if (showForm) { resetForm(); } else { setShowForm(true); setError(''); setSuccess(''); } }}>
                     <FaPlus className="me-1" /> {showForm ? 'Mbyll Formen' : 'Shto Perdorues'}
                 </button>
             </div>
