@@ -55,6 +55,9 @@ const Navbar = () => {
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/kuponat">Kuponat</Link>
                                     </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/perberesit">Perberesit</Link>
+                                    </li>
                                 </>
                             )}
                             {isAdmin() && (
