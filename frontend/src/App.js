@@ -4,6 +4,8 @@ import { lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import './App.css';
+import Footer from './components/Footer';
 
 // Lazy loading - ngarkon faqet vetem kur nevoiten
 const Login = lazy(() => import('./pages/Login'));
@@ -98,6 +100,7 @@ const AppContent = () => {
           <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </Suspense>
+      {user && <Footer />}
     </Router>
   );
 };
