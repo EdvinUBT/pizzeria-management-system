@@ -224,7 +224,12 @@ const Produktet = () => {
                                 filteredProduktet.map((p) => (
                                     <tr key={p.produkt_id}>
                                         <td>{p.produkt_id}</td>
-                                        <td>{p.emri_produktit}</td>
+                                        <td className="d-flex align-items-center">
+                                            {p.foto_url && (
+                                                <img src={p.foto_url} alt={p.emri_produktit} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', marginRight: '10px' }} />
+                                            )}
+                                            {p.emri_produktit}
+                                        </td>
                                         <td><span className="badge bg-info">{p.emri_kategorise}</span></td>
                                         <td>{p.cmimi_baze} €</td>
                                         <td>{p.koha_pergatitjes_min} min</td>
