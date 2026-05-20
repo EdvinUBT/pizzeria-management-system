@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, refreshAccessToken, logout } = require('../controllers/authController');
+const { register, login, refreshAccessToken, logout, logoutAll } = require('../controllers/authController');
+const { verifyToken } = require('../middleware/authMiddleware');
 const { validateRegister, validateLogin } = require('../middleware/validateMiddleware');
 
 // POST /api/auth/register - Regjistrimi
@@ -14,5 +15,7 @@ router.post('/refresh-token', refreshAccessToken);
 
 // POST /api/auth/logout - Logout
 router.post('/logout', logout);
+
+router.post('/logout-all', verifyToken, logoutAll);
 
 module.exports = router;

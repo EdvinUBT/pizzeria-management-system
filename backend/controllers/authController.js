@@ -224,9 +224,29 @@ const refreshAccessToken = async (req, res) => {
             { expiresIn: '15m' }
         );
 
+        // REFRESH TOKEN ROTATION - revoko tokenin e vjeter
+        await db.query(
+            'UPDATE refresh_tokens SET revoked = NOW() WHERE token = ?',
+            [refreshToken]
+        );
+
+        // Krijo refresh token te ri
+        const newRefreshToken = jwt.sign(
+            { id: decoded.id },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await db.query(
+            'INSERT INTO refresh_tokens (user_id, token, expires) VALUES (?, ?, ?)',
+            [decoded.id, newRefreshToken, expires]
+        );
+
         res.json({
             sukses: true,
-            accessToken: newAccessToken
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
         });
 
     } catch (error) {
@@ -264,5 +284,30 @@ const logout = async (req, res) => {
         });
     }
 };
+// ==========================================
+// LOGOUT NGA TE GJITHA PAJISJET
+// ==========================================
+const logoutAll = async (req, res) => {
+    try {
+        const userId = req.user.id;
 
-module.exports = { register, login, refreshAccessToken, logout };
+        await db.query(
+            'UPDATE refresh_tokens SET revoked = NOW() WHERE user_id = ? AND revoked IS NULL',
+            [userId]
+        );
+
+        res.json({
+            sukses: true,
+            mesazhi: 'Logout nga te gjitha pajisjet u krye me sukses!'
+        });
+
+    } catch (error) {
+        console.error('Gabim gjate logout all:', error);
+        res.status(500).json({
+            sukses: false,
+            mesazhi: 'Gabim ne server'
+        });
+    }
+};
+
+module.exports = { register, login, refreshAccessToken, logout, logoutAll };
