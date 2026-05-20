@@ -58,6 +58,9 @@ const Navbar = () => {
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/perberesit">Perberesit</Link>
                                     </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/produkt-perberesit">Produkt-Perberesit</Link>
+                                    </li>
                                 </>
                             )}
                             {isAdmin() && (

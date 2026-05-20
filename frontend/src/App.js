@@ -24,6 +24,7 @@ const Users = lazy(() => import('./pages/Users'));
 const Roles = lazy(() => import('./pages/Roles'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Perberesit = lazy(() => import('./pages/Perberesit'));
+const ProduktPerberesit = lazy(() => import('./pages/ProduktPerberesit'));
 
 // Loading spinner
 const Loading = () => (
@@ -100,6 +101,7 @@ const AppContent = () => {
           <Route path="/users" element={<AdminOnlyRoute><Users /></AdminOnlyRoute>} />
           <Route path="/roles" element={<AdminOnlyRoute><Roles /></AdminOnlyRoute>} />
           <Route path="/perberesit" element={<AdminRoute><Perberesit /></AdminRoute>} />
+          <Route path="/produkt-perberesit" element={<AdminRoute><ProduktPerberesit /></AdminRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
