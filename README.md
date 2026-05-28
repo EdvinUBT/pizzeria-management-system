@@ -2,7 +2,7 @@
 
 Sistem i plotë për menaxhimin e një picërie — nga porosia deri te dërgesa.
 
-Ndërtuar me **Node.js**, **React**, dhe **MySQL** si projekt për lëndën Lab Course 1 (Programim) në Kolegjin UBT, viti akademik 2025/2026.
+Ndërtuar me **Node.js**, **React**, dhe **MySQL** si projekt për lëndën Lab Course 1 (Programim).   
 
 ---
 
@@ -207,14 +207,7 @@ pizzeria-management-system/
 
 ---
 
-## 📸 Screenshots
-
-> Screenshots do të shtohen së shpejti.
-
----
-
 ## 👤 Autori
 
 - **Edvin** — [@EdvinUBT](https://github.com/EdvinUBT)
 - Kolegji UBT — Lab Course 1 (Programim)
-- Viti Akademik: 2025/2026
