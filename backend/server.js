@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const db = require('./config/db');
 const createTables = require('./models/database');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 // Konfigurimi i variablave te mjedisit nga .env
 dotenv.config();
@@ -12,6 +14,40 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Swagger konfigurimi
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Pizzeria Management System API',
+            version: '1.0.0',
+            description: 'API dokumentacioni per Sistemin e Menaxhimit te Picerise',
+            contact: {
+                name: 'Edvin',
+            },
+        },
+        servers: [
+            {
+                url: 'http://localhost:5000',
+                description: 'Serveri Lokal',
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+    },
+    apis: ['./routes/*.js'],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Importo rutat
 const authRoutes = require('./routes/authRoutes');
