@@ -88,6 +88,8 @@ const userClaimsRoutes = require('./routes/userClaimsRoutes');
 
 const userTokensRoutes = require('./routes/userTokensRoutes');
 
+const klientPaneliRoutes = require('./routes/klientPaneliRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -95,7 +97,7 @@ app.get('/', (req, res) => {
 
 // Rutat e autentifikimit
 app.use('/api/auth', authRoutes);
-
+//qekjo /api/auth i thote kur eshte route /api/auth shko merri senet me i menaxhu ne authRoutes
 app.use('/api/kategorite', kategoriteRoutes);
 
 app.use('/api/produktet', produktetRoutes);
@@ -131,6 +133,8 @@ app.use('/api/adresat', adresatRoutes);
 app.use('/api/user-claims', userClaimsRoutes);
 
 app.use('/api/user-tokens', userTokensRoutes);
+
+app.use('/api/klient-paneli', klientPaneliRoutes);
 
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;

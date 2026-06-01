@@ -11,10 +11,13 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    // User i thjeshte nuk sheh navbar-in admin
+    const isStaff = isAdmin() || isMenaxher();
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container-fluid">
-                <Link className="navbar-brand d-flex align-items-center" to="/">
+                <Link className="navbar-brand d-flex align-items-center" to={isStaff ? '/dashboard' : '/klient'}>
                     <FaPizzaSlice className="me-2" />
                     Piceria
                 </Link>
@@ -26,20 +29,20 @@ const Navbar = () => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     {user && (
                         <ul className="navbar-nav me-auto">
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/kategorite">Kategorite</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/produktet">Produktet</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/menyte">Menyte</Link>
-                            </li>
-                            {(isAdmin() || isMenaxher()) && (
+                            {isStaff ? (
                                 <>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/kategorite">Kategorite</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/produktet">Produktet</Link>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/menyte">Menyte</Link>
+                                    </li>
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/porosite">Porosite</Link>
                                     </li>
@@ -64,23 +67,27 @@ const Navbar = () => {
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/adresat">Adresat</Link>
                                     </li>
+                                    {isAdmin() && (
+                                        <li className="nav-item dropdown" style={{ position: 'relative' }}>
+                                            <a className="nav-link dropdown-toggle" href="#!" role="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    const menu = e.target.nextElementSibling;
+                                                    menu.classList.toggle('show');
+                                                }}>
+                                                Administrimi
+                                            </a>
+                                            <ul className="dropdown-menu dropdown-menu-dark">
+                                                <li><Link className="dropdown-item" to="/users" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Perdoruesit</Link></li>
+                                                <li><Link className="dropdown-item" to="/roles" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Rolet</Link></li>
+                                                <li><Link className="dropdown-item" to="/vleresimet" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Vleresimet</Link></li>
+                                            </ul>
+                                        </li>
+                                    )}
                                 </>
-                            )}
-                            {isAdmin() && (
-                                <li className="nav-item dropdown" style={{ position: 'relative' }}>
-                                    <a className="nav-link dropdown-toggle" href="#!" role="button"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            const menu = e.target.nextElementSibling;
-                                            menu.classList.toggle('show');
-                                        }}>
-                                        Administrimi
-                                    </a>
-                                    <ul className="dropdown-menu dropdown-menu-dark">
-                                        <li><Link className="dropdown-item" to="/users" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Perdoruesit</Link></li>
-                                        <li><Link className="dropdown-item" to="/roles" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Rolet</Link></li>
-                                        <li><Link className="dropdown-item" to="/vleresimet" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Vleresimet</Link></li>
-                                    </ul>
+                            ) : (
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/klient">Paneli Im</Link>
                                 </li>
                             )}
                         </ul>

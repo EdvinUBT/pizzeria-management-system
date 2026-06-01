@@ -81,7 +81,15 @@ router.post('/register', validateRegister, register);
  *         description: Email ose fjalekalimi i gabuar
  */
 router.post('/login', validateLogin, login);
-
+//kur e bon /api/auth/login 
+//qet /api/auth e merr prej server 
+//tash /api/auth erdhem prej server i kena thone hajde ne authRoutes per ma shume menaxhim 
+//kur na ja bojme /login serveri e lyp thote okej per kit pjese koka fjala 
+//thote hajde te qikjo validateLogin hin 
+//nese gjithecka eshte ne rregull ne validateLogin qe i ka shenu perdoruesi email dhe password 
+// thote okej vazhdo tash te login controller aty ku eshte tamon kodi me verifiku a jon te dhanat e sakta prej databazes 
+//tash edhe login u bo sukses dmth e ka bo sign jwt edhe tash ky vazhdon jwt ruhet si me thone ne memorie me qato te dhana 
+//kur ja dergojna na access tokenin copy naj endpointi qysh ja dergojsha une dashboard 
 /**
  * @swagger
  * /api/auth/refresh-token:

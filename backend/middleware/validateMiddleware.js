@@ -45,6 +45,8 @@ const validateLogin = (req, res, next) => {
     }
     next();
 };
+//qetu e kontrollojme a ja kena dergu emailin edhe password qysh duhet amo nuk i merr prej database kjo 
+//kjo nihere veq e kqyr a jon mbush qato inpute edhe pshb a eshte email a u shenu veq kshtu ania pa @okej.com 
 
 // Validimi i kategorise
 const validateKategori = (req, res, next) => {

@@ -27,5 +27,8 @@ const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
  *         description: Vetem admin/menaxher ka qasje
  */
 router.get('/', verifyToken, verifyRole('admin', 'menaxher'), getDashboard);
-
+//pshb ti e ki kur hin me url prej server e ki me u qase ne dashboard duhet /api/dashboard/
+//edhe ky vjen thote kur eshte api/dashboard dhe qeky / thote verifikoj tokenat mandej verifikoja rolin e mandej shko merri senet
+//po para se mu bo qeto sene tokenat jon rujt prej kur bon login 
+//a e lexove qeta dhe a e u kuptove jo bash mire cka kem me ba kur tna vet qishtu a vec me ardhe me ja tregu qito sene?
 module.exports = router;

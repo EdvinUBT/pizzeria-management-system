@@ -45,6 +45,12 @@ const register = async (req, res) => {
             );
         }
 
+        // Krijo automatikisht edhe si klient
+        await db.query(
+            'INSERT INTO klientet (emri, mbiemri, email, telefoni, fjalekalimi_hash) VALUES (?, ?, ?, ?, ?)',
+            [emri, mbiemri, email, phone_number || '', password_hash]
+        );
+
         res.status(201).json({
             sukses: true,
             mesazhi: 'Regjistrimi u krye me sukses!',
@@ -122,6 +128,13 @@ const login = async (req, res) => {
 
         const userRoles = roles.map(r => r.emertimi);
 
+        //tash kodi nalte eshte tu lyp ne databaze userin a ekziston nese po vazhdon thote okej krijoje access tokenin 
+        // tash ky thote okej kur qaj perdorues po ekzistojka une ja krijoj qate tokenin edhe une ja marre ja ruj te dhanat 
+        // id, email, rolin qashtu ja ke caktu ti 
+        // edhe i thu kodi i tokenit merret ne file .env edhe i thu qiky token ka me kon i vlefshem per 15 minuta 
+        //nenshkruje jwt.sign dmth e nenshkrun me qeto te dhanat sikur me thone e enkripton dmth krejt qeto te dhanat 
+        // id, emailin, rolin, kodin e jwt per access token, kohen sa ka me zgjate ai i nenshkrun si me thone pshb krejt qato
+        //boni me qet emer spaokspokdpsoakdasdkapkd na kit kod se kuptojna kto sene ndodhin ne background 
         // Krijo Access Token
         const accessToken = jwt.sign(
             {
@@ -132,7 +145,8 @@ const login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '15m' }
         );
-
+        // edhe me refresh token it is the same thing veq qe kjo e ka kohezgjatjen per 7 dite edhe e bon refresh qate 
+        //access tokenin amo kto spo ta spjegoj se mundet me tu pshtjelle nihere me renci me kuptu access tokenin
         // Krijo Refresh Token
         const refreshToken = jwt.sign(
             { id: user.id },
@@ -147,6 +161,13 @@ const login = async (req, res) => {
             [user.id, refreshToken, expires]
         );
 
+        // Gjej klient_id nese ekziston
+        const [klientResult] = await db.query(
+            'SELECT klient_id FROM klientet WHERE email = ?',
+            [user.email]
+        );
+        const klient_id = klientResult.length > 0 ? klientResult[0].klient_id : null;
+
         res.json({
             sukses: true,
             mesazhi: 'Login u krye me sukses!',
@@ -157,9 +178,12 @@ const login = async (req, res) => {
                 emri: user.emri,
                 mbiemri: user.mbiemri,
                 email: user.email,
-                roles: userRoles
+                roles: userRoles,
+                klient_id: klient_id
             }
         });
+        //tash  gjithecka ka shku ne rregull supozojna i thojme ne back kthema qate access token refresh token 
+        //krejt qato sene po i kthejna me res.json kthemi si json data
 
     } catch (error) {
         console.error('Gabim gjate login:', error);
