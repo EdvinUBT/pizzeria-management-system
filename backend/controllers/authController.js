@@ -168,11 +168,25 @@ const login = async (req, res) => {
         );
         const klient_id = klientResult.length > 0 ? klientResult[0].klient_id : null;
 
+        // Vendos Access Token si httpOnly cookie
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: false,         // true ne production (HTTPS)
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000  // 15 minuta
+        });
+
+        // Vendos Refresh Token si httpOnly cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 dite
+        });
+
         res.json({
             sukses: true,
             mesazhi: 'Login u krye me sukses!',
-            accessToken,
-            refreshToken,
             perdoruesi: {
                 id: user.id,
                 emri: user.emri,
@@ -199,7 +213,7 @@ const login = async (req, res) => {
 // ==========================================
 const refreshAccessToken = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.cookies.refreshToken;
 
         if (!refreshToken) {
             return res.status(401).json({
@@ -267,10 +281,25 @@ const refreshAccessToken = async (req, res) => {
             [decoded.id, newRefreshToken, expires]
         );
 
+        // Vendos tokenat e rinj si cookies
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000
+        });
+
+        res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/api/auth'
+        });
+
         res.json({
             sukses: true,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken
+            mesazhi: 'Tokenat u rifreskuan me sukses!'
         });
 
     } catch (error) {
@@ -287,13 +316,18 @@ const refreshAccessToken = async (req, res) => {
 // ==========================================
 const logout = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.cookies.refreshToken;
 
-        // Revoko refresh tokenin
-        await db.query(
-            'UPDATE refresh_tokens SET revoked = NOW() WHERE token = ?',
-            [refreshToken]
-        );
+        if (refreshToken) {
+            await db.query(
+                'UPDATE refresh_tokens SET revoked = NOW() WHERE token = ?',
+                [refreshToken]
+            );
+        }
+
+        // Pastro cookies
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
 
         res.json({
             sukses: true,

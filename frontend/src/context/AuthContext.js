@@ -19,12 +19,10 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const response = await API.post('/auth/login', { email, password });
-        const { accessToken, refreshToken, perdoruesi } = response.data;
+        const { perdoruesi } = response.data;
 
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        // Ruaj vetem te dhenat e userit (jo tokenat!)
         localStorage.setItem('user', JSON.stringify(perdoruesi));
-
         setUser(perdoruesi);
         return response.data;
     };
@@ -36,14 +34,11 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            await API.post('/auth/logout', { refreshToken });
+            await API.post('/auth/logout');
         } catch (error) {
             console.error('Gabim gjate logout:', error);
         }
 
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         setUser(null);
     };

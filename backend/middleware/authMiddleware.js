@@ -2,8 +2,7 @@ const jwt = require('jsonwebtoken');
 //qetu testohen tokenat okejjj
 // Middleware per te verifikuar JWT tokenin
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.accessToken;
     // pshb ne backend kur u bo kerkesa ekziston nje si kategori qe quhet headers edhe express.js e njef kit req.headers 
     //edhe na i thojna shko ne kategori headers edhe search per authorization 
     // edhe tash na i thojme okej kqyre a ekziston qeky authHeader qe e rujtem edhe bone split ndaje ku ka hapesire merre 

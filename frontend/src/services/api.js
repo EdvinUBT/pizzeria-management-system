@@ -1,16 +1,8 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: 'http://localhost:5000/api'
-});
-
-// Shto tokenin automatikisht ne cdo kerkese
-API.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+    baseURL: 'http://localhost:5000/api',
+    withCredentials: true    // dergon cookies automatikisht
 });
 
 // Menaxho refresh token kur access token skadon
@@ -23,22 +15,14 @@ API.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                const response = await axios.post('http://localhost:5000/api/auth/refresh-token', {
-                    refreshToken
+                // Therrit refresh endpoint - cookies dergohen automatikisht
+                await axios.post('http://localhost:5000/api/auth/refresh-token', {}, {
+                    withCredentials: true
                 });
 
-                const { accessToken, refreshToken: newRefreshToken } = response.data;
-                localStorage.setItem('accessToken', accessToken);
-                if (newRefreshToken) {
-                    localStorage.setItem('refreshToken', newRefreshToken);
-                }
-
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                // Riprovo kerkesen origjinale
                 return API(originalRequest);
             } catch (refreshError) {
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
                 localStorage.removeItem('user');
                 window.location.href = '/login';
                 return Promise.reject(refreshError);
