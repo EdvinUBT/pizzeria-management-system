@@ -125,6 +125,14 @@ const Users = () => {
     };
 
     const handleHiqRol = async (userId, roleId) => {
+        // Mos lejo heqjen e rolit admin nga vetja
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        const adminRole = roles.find(r => r.emertimi === 'admin');
+        if (currentUser?.id === userId && adminRole?.id === roleId) {
+            setError('Nuk mundeni te hiqni rolin admin nga vetja!');
+            return;
+        }
+
         if (window.confirm('A doni te hiqni kete rol?')) {
             try {
                 await API.delete(`/user-roles/${userId}/${roleId}`);
@@ -252,9 +260,20 @@ const Users = () => {
                                         <td>{u.mbiemri}</td>
                                         <td>{u.email}</td>
                                         <td>
-                                            {u.rolet ? u.rolet.split(',').map((r, i) => (
-                                                <span key={i} className="badge bg-info me-1">{r}</span>
-                                            )) : <span className="text-muted">Pa rol</span>}
+                                            {u.rolet ? u.rolet.split(',').map((r, i) => {
+                                                const roli = roles.find(role => role.emertimi === r.trim());
+                                                return (
+                                                    <span key={i} className="badge bg-info me-1">
+                                                        {r}
+                                                        <button
+                                                            className="btn-close btn-close-white ms-1"
+                                                            style={{ fontSize: '0.5em' }}
+                                                            onClick={() => roli && handleHiqRol(u.id, roli.id)}
+                                                            title="Hiq rolin"
+                                                        ></button>
+                                                    </span>
+                                                );
+                                            }) : <span className="text-muted">Pa rol</span>}
                                             <button className="btn btn-sm btn-outline-success ms-1" onClick={() => setShowRoleForm(showRoleForm === u.id ? null : u.id)} title="Menaxho rolet">+</button>
                                             {showRoleForm === u.id && (
                                                 <div className="mt-2 d-flex">
