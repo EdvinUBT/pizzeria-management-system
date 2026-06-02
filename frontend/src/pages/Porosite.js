@@ -275,9 +275,14 @@ const Porosite = () => {
                             <div className="col-md-3"><strong>Statusi:</strong> <span className={`badge ${getStatusBadge(showDetails.statusi)}`}>{showDetails.statusi.replace('_', ' ')}</span></div>
                             <div className="col-md-3"><strong>Pagesa:</strong> {showDetails.metoda_pageses}</div>
                         </div>
+                        {showDetails.shenimet && (
+                            <div className="alert alert-warning py-2 mb-3">
+                                <strong>Shenimet e klientit:</strong> {showDetails.shenimet}
+                            </div>
+                        )}
                         <table className="table table-sm">
                             <thead>
-                                <tr><th>Produkti</th><th>Sasia</th><th>Cmimi</th><th>Nentotali</th></tr>
+                                <tr><th>Produkti</th><th>Sasia</th><th>Cmimi</th><th>Nentotali</th><th>Personalizimi</th></tr>
                             </thead>
                             <tbody>
                                 {showDetails.detajet?.map((d, i) => (
@@ -286,6 +291,7 @@ const Porosite = () => {
                                         <td>{d.sasia}</td>
                                         <td>{d.cmimi_njesi} €</td>
                                         <td>{d.nentotali} €</td>
+                                        <td>{d.personalizimi || <span className="text-muted">—</span>}</td>
                                     </tr>
                                 ))}
                             </tbody>

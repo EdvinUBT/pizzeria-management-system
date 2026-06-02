@@ -111,9 +111,12 @@ const krijoPorosi = async (req, res) => {
         // Shto detajet
         if (detajet && detajet.length > 0) {
             for (const detaj of detajet) {
-                // Merr cmimin aktual nga databaza
-                const [produkt] = await db.query('SELECT cmimi_baze FROM produktet WHERE produkt_id = ?', [detaj.produkt_id]);
-                const cmimi = produkt.length > 0 ? produkt[0].cmimi_baze : detaj.cmimi_njesi;
+                // Perdor cmimin e derguar (mund te jete cmim oferte), ose merr nga databaza
+                let cmimi = detaj.cmimi_njesi;
+                if (!cmimi) {
+                    const [produkt] = await db.query('SELECT cmimi_baze FROM produktet WHERE produkt_id = ?', [detaj.produkt_id]);
+                    cmimi = produkt.length > 0 ? produkt[0].cmimi_baze : 0;
+                }
                 const nentotali = detaj.sasia * cmimi;
                 totali += nentotali;
 
@@ -304,6 +307,55 @@ const verifikoKupon = async (req, res) => {
     }
 };
 
+// Merr vleresimet per produktet
+const getVleresimetProdukteve = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT dp.produkt_id, 
+                ROUND(AVG(v.yjet), 1) AS mesatarja_yjeve,
+                COUNT(v.vleresim_id) AS numri_vleresimeve
+            FROM vleresimet v
+            INNER JOIN detajet_porosise dp ON dp.porosi_id = v.porosi_id
+            GROUP BY dp.produkt_id
+        `);
+
+        // Merr komentet e fundit per secilin produkt
+        const [komentet] = await db.query(`
+            SELECT dp.produkt_id, v.yjet, v.komenti, v.data_vleresimit, k.emri
+            FROM vleresimet v
+            INNER JOIN detajet_porosise dp ON dp.porosi_id = v.porosi_id
+            INNER JOIN klientet k ON v.klient_id = k.klient_id
+            WHERE v.komenti IS NOT NULL AND v.komenti != ''
+            ORDER BY v.data_vleresimit DESC
+        `);
+
+        // Grupo komentet sipas produktit
+        const komenteSipasProduktit = {};
+        for (const k of komentet) {
+            if (!komenteSipasProduktit[k.produkt_id]) {
+                komenteSipasProduktit[k.produkt_id] = [];
+            }
+            if (komenteSipasProduktit[k.produkt_id].length < 3) {
+                komenteSipasProduktit[k.produkt_id].push(k);
+            }
+        }
+
+        const rezultati = {};
+        for (const r of rows) {
+            rezultati[r.produkt_id] = {
+                mesatarja: r.mesatarja_yjeve,
+                numri: r.numri_vleresimeve,
+                komentet: komenteSipasProduktit[r.produkt_id] || []
+            };
+        }
+
+        res.json({ sukses: true, te_dhena: rezultati });
+    } catch (error) {
+        console.error('Gabim:', error);
+        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+    }
+};
+
 module.exports = {
     getProfilin,
     perditesoProfilin,
@@ -313,5 +365,6 @@ module.exports = {
     anuloPorosi,
     krijoVleresim,
     getMenyteAktive,
-    verifikoKupon
+    verifikoKupon,
+    getVleresimetProdukteve
 };

@@ -67,7 +67,7 @@ const Navbar = () => {
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/adresat">Adresat</Link>
                                     </li>
-                                    {isAdmin() && (
+                                    {(isAdmin() || isMenaxher()) && (
                                         <li className="nav-item dropdown" style={{ position: 'relative' }}>
                                             <a className="nav-link dropdown-toggle" href="#!" role="button"
                                                 onClick={(e) => {
@@ -78,8 +78,8 @@ const Navbar = () => {
                                                 Administrimi
                                             </a>
                                             <ul className="dropdown-menu dropdown-menu-dark">
-                                                <li><Link className="dropdown-item" to="/users" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Perdoruesit</Link></li>
-                                                <li><Link className="dropdown-item" to="/roles" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Rolet</Link></li>
+                                                {isAdmin() && <li><Link className="dropdown-item" to="/users" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Perdoruesit</Link></li>}
+                                                {isAdmin() && <li><Link className="dropdown-item" to="/roles" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Rolet</Link></li>}
                                                 <li><Link className="dropdown-item" to="/vleresimet" onClick={(e) => e.target.closest('.dropdown-menu').classList.remove('show')}>Vleresimet</Link></li>
                                             </ul>
                                         </li>

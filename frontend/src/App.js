@@ -60,6 +60,14 @@ const AdminOnlyRoute = ({ children }) => {
   if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" />;
   if (!user.roles?.includes('admin')) {
+    if (user.roles?.includes('menaxher')) {
+      return (
+        <div className="container mt-5 text-center">
+          <h3 className="text-danger">Qasja e Refuzuar!</h3>
+          <p className="text-muted">Vetem administratori ka qasje ketu.</p>
+        </div>
+      );
+    }
     return <Navigate to="/klient" />;
   }
   return children;

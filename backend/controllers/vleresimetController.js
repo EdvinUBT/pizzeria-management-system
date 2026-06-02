@@ -4,11 +4,11 @@ const db = require('../config/db');
 const getVleresimet = async (req, res) => {
     try {
         const [rows] = await db.query(`
-            SELECT v.*, k.emri, k.mbiemri
-            FROM vleresimet v
-            LEFT JOIN klientet k ON v.klient_id = k.klient_id
-            ORDER BY v.data_vleresimit DESC
-        `);
+                SELECT v.*, k.emri, k.mbiemri
+                FROM vleresimet v
+                LEFT JOIN klientet k ON v.klient_id = k.klient_id
+                ORDER BY v.data_vleresimit DESC
+            `);
         res.json({ sukses: true, te_dhena: rows });
     } catch (error) {
         console.error('Gabim:', error);
@@ -20,11 +20,11 @@ const getVleresimet = async (req, res) => {
 const getVleresimetEPorosise = async (req, res) => {
     try {
         const [rows] = await db.query(`
-            SELECT v.*, k.emri, k.mbiemri
-            FROM vleresimet v
-            LEFT JOIN klientet k ON v.klient_id = k.klient_id
-            WHERE v.porosi_id = ?
-        `, [req.params.porosiId]);
+                SELECT v.*, k.emri, k.mbiemri
+                FROM vleresimet v
+                LEFT JOIN klientet k ON v.klient_id = k.klient_id
+                WHERE v.porosi_id = ?
+            `, [req.params.porosiId]);
         res.json({ sukses: true, te_dhena: rows });
     } catch (error) {
         console.error('Gabim:', error);

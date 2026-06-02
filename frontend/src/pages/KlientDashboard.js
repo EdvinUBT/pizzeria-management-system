@@ -21,6 +21,8 @@ const KlientDashboard = () => {
     const [porosite, setPorosite] = useState([]);
     const [adresat, setAdresat] = useState([]);
     const [profili, setProfili] = useState(null);
+    const [vleresimetProdukteve, setVleresimetProdukteve] = useState({});
+    const [showVleresimetProdukti, setShowVleresimetProdukti] = useState(null);
 
     // Shporta
     const [shporta, setShporta] = useState([]);
@@ -69,7 +71,8 @@ const KlientDashboard = () => {
                 fetchProduktet(),
                 fetchPorosite(),
                 fetchAdresat(),
-                fetchProfilin()
+                fetchProfilin(),
+                fetchVleresimetProdukteve()
             ]);
         } catch (err) {
             console.error('Gabim:', err);
@@ -116,6 +119,13 @@ const KlientDashboard = () => {
                 telefoni: res.data.te_dhena.telefoni || '',
                 adresa: res.data.te_dhena.adresa || ''
             });
+        } catch (err) { console.error(err); }
+    };
+
+    const fetchVleresimetProdukteve = async () => {
+        try {
+            const res = await API.get('/klient-paneli/vleresimet-produkteve');
+            setVleresimetProdukteve(res.data.te_dhena || {});
         } catch (err) { console.error(err); }
     };
 
@@ -194,11 +204,21 @@ const KlientDashboard = () => {
                 adresa_dergeses: adresaDergeses,
                 shenimet: shenimet,
                 kupon_kodi: kuponKodi || null,
-                detajet: shporta.map(s => ({
-                    produkt_id: s.produkt_id,
-                    sasia: s.sasia,
-                    personalizimi: s.personalizimi || null
-                }))
+                detajet: shporta.flatMap(s => {
+                    if (s.detajet_ofertes) {
+                        return s.detajet_ofertes.map(d => ({
+                            produkt_id: d.produkt_id,
+                            sasia: d.sasia * s.sasia,
+                            cmimi_njesi: d.cmimi_njesi,
+                            personalizimi: s.personalizimi || null
+                        }));
+                    }
+                    return [{
+                        produkt_id: s.produkt_id,
+                        sasia: s.sasia,
+                        personalizimi: s.personalizimi || null
+                    }];
+                })
             });
 
             setSuccess(`Porosia #${res.data.porosi_id} u krijua me sukses! Totali: ${res.data.totali}€${res.data.zbritja > 0 ? ` (Zbritje: ${res.data.zbritja}€)` : ''}`);
@@ -505,80 +525,229 @@ const KlientDashboard = () => {
                 {/* ============ TAB: MENYJA ============ */}
                 {activeTab === 'menu' && (
                     <div>
-                        {/* Produktet sipas kategorive */}
-                        {menyte.length > 0 ? (
-                            menyte.map(meny => (
-                                <div key={meny.meny_id} className="mb-4">
-                                    <h5 className="mb-3"><FaUtensils className="me-2 text-danger" />{meny.emri_menys}</h5>
-                                    {meny.pershkrimi && <p className="text-muted">{meny.pershkrimi}</p>}
-                                    <div className="row">
-                                        {meny.produktet?.map(p => (
-                                            <div key={p.meny_produkt_id} className="col-md-4 col-lg-3 mb-3">
-                                                <div className="card h-100 shadow-sm border-0" style={{ transition: 'transform 0.2s' }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                                                    {p.foto_url && (
-                                                        <img src={p.foto_url} alt={p.emri_produktit}
-                                                            className="card-img-top" style={{ height: 180, objectFit: 'cover' }} />
-                                                    )}
-                                                    <div className="card-body d-flex flex-column">
-                                                        <h6 className="card-title">{p.emri_produktit}</h6>
-                                                        {p.pershkrimi && <p className="card-text small text-muted flex-grow-1">{p.pershkrimi}</p>}
-                                                        <div className="d-flex justify-content-between align-items-center mt-2">
-                                                            <div>
-                                                                {p.cmimi_special && parseFloat(p.cmimi_special) < parseFloat(p.cmimi_baze) ? (
-                                                                    <>
-                                                                        <span className="text-decoration-line-through text-muted small">{parseFloat(p.cmimi_baze).toFixed(2)}€</span>
-                                                                        <span className="fw-bold text-danger ms-1">{parseFloat(p.cmimi_special).toFixed(2)}€</span>
-                                                                    </>
-                                                                ) : (
-                                                                    <span className="fw-bold text-danger">{parseFloat(p.cmimi_baze).toFixed(2)}€</span>
-                                                                )}
-                                                            </div>
-                                                            <button className="btn btn-sm btn-danger" onClick={() => shtoNeShporte(p)}>
-                                                                <FaPlus className="me-1" />Shto
-                                                            </button>
-                                                        </div>
-                                                        {p.koha_pergatitjes_min > 0 && (
-                                                            <small className="text-muted mt-1"><FaClock className="me-1" />{p.koha_pergatitjes_min} min</small>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                        {/* Vleresimi popup per produkt */}
+                        {showVleresimetProdukti && vleresimetProdukteve[showVleresimetProdukti] && (
+                            <div className="card shadow-sm mb-4 border-warning">
+                                <div className="card-header bg-warning text-dark d-flex justify-content-between">
+                                    <span><FaStar className="me-1" />Vleresimet e Klienteve</span>
+                                    <button className="btn btn-sm btn-dark" onClick={() => setShowVleresimetProdukti(null)}><FaTimes /></button>
                                 </div>
-                            ))
-                        ) : (
-                            /* Nese nuk ka meny aktive, shfaq produktet direkt */
-                            <div>
-                                <h5 className="mb-3"><FaPizzaSlice className="me-2 text-danger" />Produktet Tona</h5>
-                                <div className="row">
-                                    {produktet.filter(p => p.aktive).map(p => (
-                                        <div key={p.produkt_id} className="col-md-4 col-lg-3 mb-3">
-                                            <div className="card h-100 shadow-sm border-0" style={{ transition: 'transform 0.2s' }}
-                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                                                {p.foto_url && (
-                                                    <img src={p.foto_url} alt={p.emri_produktit}
-                                                        className="card-img-top" style={{ height: 180, objectFit: 'cover' }} />
-                                                )}
-                                                <div className="card-body d-flex flex-column">
-                                                    <h6 className="card-title">{p.emri_produktit}</h6>
-                                                    {p.pershkrimi && <p className="card-text small text-muted flex-grow-1">{p.pershkrimi}</p>}
-                                                    <div className="d-flex justify-content-between align-items-center mt-2">
-                                                        <span className="fw-bold text-danger">{parseFloat(p.cmimi_baze).toFixed(2)}€</span>
-                                                        <button className="btn btn-sm btn-danger" onClick={() => shtoNeShporte(p)}>
-                                                            <FaPlus className="me-1" />Shto
-                                                        </button>
-                                                    </div>
+                                <div className="card-body">
+                                    {vleresimetProdukteve[showVleresimetProdukti].komentet.length > 0 ? (
+                                        vleresimetProdukteve[showVleresimetProdukti].komentet.map((k, i) => (
+                                            <div key={i} className="border-bottom py-2">
+                                                <div className="d-flex align-items-center mb-1">
+                                                    <strong className="me-2">{k.emri}</strong>
+                                                    <span>
+                                                        {[1, 2, 3, 4, 5].map(y => (
+                                                            <FaStar key={y} size={12} style={{ color: y <= k.yjet ? '#f59e0b' : '#d1d5db' }} />
+                                                        ))}
+                                                    </span>
+                                                    <small className="text-muted ms-2">{new Date(k.data_vleresimit).toLocaleDateString('sq-AL')}</small>
                                                 </div>
+                                                <p className="mb-0 small">{k.komenti}</p>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))
+                                    ) : (
+                                        <p className="text-muted mb-0">Nuk ka komente ende per kete produkt.</p>
+                                    )}
                                 </div>
                             </div>
                         )}
+
+                        {/* OFERTA SPECIALE - Menyte */}
+                        {menyte.length > 0 && (
+                            <div className="mb-5">
+                                <h4 className="mb-3" style={{ color: '#dc3545' }}><FaTag className="me-2" />Oferta Speciale</h4>
+                                {menyte.map(meny => {
+                                    const pijet = meny.produktet?.filter(p => {
+                                        const kat = (p.emri_kategorise || '').toLowerCase();
+                                        return kat.includes('pije') || kat.includes('pij');
+                                    }) || [];
+                                    const joPijet = meny.produktet?.filter(p => {
+                                        const kat = (p.emri_kategorise || '').toLowerCase();
+                                        return !kat.includes('pije') && !kat.includes('pij');
+                                    }) || [];
+
+                                    // Llogarit totalin duke marre vetem pijen e pare (jo te gjitha pijet)
+                                    const pijeEPare = pijet.length > 0 ? pijet[0] : null;
+                                    const produktetPerTotal = [...joPijet];
+                                    if (pijeEPare) produktetPerTotal.push(pijeEPare);
+
+                                    const totalNormal = produktetPerTotal.reduce((t, p) => t + parseFloat(p.cmimi_baze), 0);
+                                    const totalOferte = produktetPerTotal.reduce((t, p) => t + parseFloat(p.cmimi_special || p.cmimi_baze), 0);
+
+                                    return (
+                                        <div key={meny.meny_id} className="card shadow-sm mb-4 border-0" style={{ background: 'linear-gradient(135deg, #fff5f5, #ffffff)' }}>
+                                            <div className="card-body">
+                                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h5 className="mb-0"><FaUtensils className="me-2 text-danger" />{meny.emri_menys}</h5>
+                                                        {meny.pershkrimi && <small className="text-muted">{meny.pershkrimi}</small>}
+                                                    </div>
+                                                    <div className="text-end">
+                                                        <span className="badge bg-danger px-3 py-2 mb-1">OFERTE</span>
+                                                        <div>
+                                                            <span className="text-decoration-line-through text-muted">{totalNormal.toFixed(2)}€</span>
+                                                            <span className="fw-bold text-danger ms-2 fs-5">{totalOferte.toFixed(2)}€</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="row align-items-stretch">
+                                                    {joPijet.map(p => (
+                                                        <div key={p.meny_produkt_id} className="col-md-3 mb-3">
+                                                            <div className="card border-0 bg-light h-100">
+                                                                {p.foto_url && (
+                                                                    <img src={p.foto_url} alt={p.emri_produktit}
+                                                                        className="card-img-top" style={{ height: 160, objectFit: 'cover' }} />
+                                                                )}
+                                                                <div className="card-body p-2 text-center">
+                                                                    <div className="fw-bold small">{p.emri_produktit}</div>
+                                                                    <span className="text-decoration-line-through text-muted small">{parseFloat(p.cmimi_baze).toFixed(2)}€</span>
+                                                                    <span className="text-danger fw-bold ms-1 small">{parseFloat(p.cmimi_special || p.cmimi_baze).toFixed(2)}€</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+
+                                                    {pijet.length > 0 && (
+                                                        <div className="col-md-3 mb-3">
+                                                            <div className="card border-danger h-100">
+                                                                <div className="card-header bg-danger text-white py-1 text-center">
+                                                                    <small className="fw-bold">Zgjidh Pijen</small>
+                                                                </div>
+                                                                <div className="card-body p-2 d-flex flex-column justify-content-center">
+                                                                    {pijet.map((pije, idx) => (
+                                                                        <label key={pije.meny_produkt_id}
+                                                                            className={`d-flex align-items-center p-2 rounded mb-1`}
+                                                                            style={{ cursor: 'pointer', border: '1px solid #eee' }}
+                                                                            htmlFor={`pije-${meny.meny_id}-${pije.meny_produkt_id}`}>
+                                                                            <input
+                                                                                className="form-check-input me-2"
+                                                                                type="radio"
+                                                                                name={`pije-meny-${meny.meny_id}`}
+                                                                                id={`pije-${meny.meny_id}-${pije.meny_produkt_id}`}
+                                                                                defaultChecked={idx === 0}
+                                                                            />
+                                                                            {pije.foto_url && (
+                                                                                <img src={pije.foto_url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} className="me-2" />
+                                                                            )}
+                                                                            <div>
+                                                                                <div className="fw-bold small">{pije.emri_produktit}</div>
+                                                                                <small className="text-danger">{parseFloat(pije.cmimi_special || pije.cmimi_baze).toFixed(2)}€</small>
+                                                                            </div>
+                                                                        </label>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <button className="btn btn-danger w-100 mt-2"
+                                                    onClick={() => {
+                                                        // Gjej pijen e zgjedhur
+                                                        const radioButtons = document.querySelectorAll(`input[name="pije-meny-${meny.meny_id}"]`);
+                                                        let pijaZgjedhur = pijet[0];
+                                                        radioButtons.forEach((radio, index) => {
+                                                            if (radio.checked) pijaZgjedhur = pijet[index];
+                                                        });
+
+                                                        // Hiq menyne e vjeter nese ekziston ne shporte
+                                                        const shportaPastruar = shporta.filter(s => s.eshte_oferte !== meny.meny_id);
+
+                                                        // Krijo listen e produkteve te ofertes
+                                                        const produktetOfertes = [...joPijet];
+                                                        if (pijaZgjedhur) produktetOfertes.push(pijaZgjedhur);
+
+                                                        const emrat = produktetOfertes.map(p => p.emri_produktit).join(' + ');
+
+                                                        // Shto si nje artikull te vetem
+                                                        setShporta([...shportaPastruar, {
+                                                            produkt_id: `oferte-${meny.meny_id}`,
+                                                            emri_produktit: `${meny.emri_menys} (${emrat})`,
+                                                            cmimi_baze: totalOferte,
+                                                            foto_url: joPijet[0]?.foto_url || null,
+                                                            sasia: 1,
+                                                            personalizimi: '',
+                                                            eshte_oferte: meny.meny_id,
+                                                            detajet_ofertes: produktetOfertes.map(p => ({
+                                                                produkt_id: p.produkt_id,
+                                                                sasia: 1,
+                                                                cmimi_njesi: parseFloat(p.cmimi_special || p.cmimi_baze)
+                                                            }))
+                                                        }]);
+
+                                                        setSuccess(`${meny.emri_menys} u shtua ne shporte!`);
+                                                        setTimeout(() => setSuccess(''), 3000);
+                                                    }}
+                                                >
+                                                    <FaShoppingCart className="me-2" />
+                                                    Shto ne Shporte — {totalOferte.toFixed(2)}€
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* TE GJITHA PRODUKTET */}
+                        <h4 className="mb-3"><FaPizzaSlice className="me-2 text-danger" />Te Gjitha Produktet</h4>
+                        {(() => {
+                            // Grupo produktet sipas kategorise
+                            const kategorite = {};
+                            produktet.filter(p => p.aktive).forEach(p => {
+                                const kat = p.emri_kategorise || 'Te tjera';
+                                if (!kategorite[kat]) kategorite[kat] = [];
+                                kategorite[kat].push(p);
+                            });
+
+                            return Object.keys(kategorite).map(kat => (
+                                <div key={kat} className="mb-4">
+                                    <h5 className="mb-3 text-secondary">{kat}</h5>
+                                    <div className="row">
+                                        {kategorite[kat].map(p => {
+                                            const vl = vleresimetProdukteve[p.produkt_id];
+                                            return (
+                                                <div key={p.produkt_id} className="col-md-4 col-lg-3 mb-3">
+                                                    <div className="card h-100 shadow-sm border-0" style={{ transition: 'transform 0.2s' }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        {p.foto_url && (
+                                                            <img src={p.foto_url} alt={p.emri_produktit}
+                                                                className="card-img-top" style={{ height: 180, objectFit: 'cover' }} />
+                                                        )}
+                                                        <div className="card-body d-flex flex-column">
+                                                            <h6 className="card-title">{p.emri_produktit}</h6>
+                                                            {p.pershkrimi && <p className="card-text small text-muted">{p.pershkrimi}</p>}
+                                                            {vl && (
+                                                                <div className="mb-2" style={{ cursor: 'pointer' }} onClick={() => setShowVleresimetProdukti(p.produkt_id)}>
+                                                                    {[1, 2, 3, 4, 5].map(y => (
+                                                                        <FaStar key={y} size={14} style={{ color: y <= Math.round(vl.mesatarja) ? '#f59e0b' : '#d1d5db' }} />
+                                                                    ))}
+                                                                    <small className="text-muted ms-1">({vl.numri})</small>
+                                                                </div>
+                                                            )}
+                                                            <div className="d-flex justify-content-between align-items-center mt-auto">
+                                                                <span className="fw-bold text-danger">{parseFloat(p.cmimi_baze).toFixed(2)}€</span>
+                                                                <button className="btn btn-sm btn-danger" onClick={() => shtoNeShporte(p)}>
+                                                                    <FaPlus className="me-1" />Shto
+                                                                </button>
+                                                            </div>
+                                                            {p.koha_pergatitjes_min > 0 && (
+                                                                <small className="text-muted mt-1"><FaClock className="me-1" />{p.koha_pergatitjes_min} min</small>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ));
+                        })()}
                     </div>
                 )}
 
@@ -677,7 +846,7 @@ const KlientDashboard = () => {
 
                                     {/* Artikujt */}
                                     <table className="table table-sm">
-                                        <thead><tr><th>Produkti</th><th>Sasia</th><th>Cmimi</th><th>Nentotali</th></tr></thead>
+                                        <thead><tr><th>Produkti</th><th>Sasia</th><th>Cmimi</th><th>Nentotali</th><th>Personalizimi</th></tr></thead>
                                         <tbody>
                                             {selectedPorosi.detajet?.map((d, i) => (
                                                 <tr key={i}>
@@ -685,10 +854,16 @@ const KlientDashboard = () => {
                                                     <td>{d.sasia}</td>
                                                     <td>{d.cmimi_njesi}€</td>
                                                     <td>{d.nentotali}€</td>
+                                                    <td>{d.personalizimi || <span className="text-muted">—</span>}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
+                                    {selectedPorosi.shenimet && (
+                                        <div className="alert alert-warning py-2">
+                                            <strong>Shenimet:</strong> {selectedPorosi.shenimet}
+                                        </div>
+                                    )}
 
                                     {/* Dergesa info */}
                                     {selectedPorosi.dergesa && (

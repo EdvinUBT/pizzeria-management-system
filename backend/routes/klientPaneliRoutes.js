@@ -9,7 +9,8 @@ const {
     anuloPorosi,
     krijoVleresim,
     getMenyteAktive,
-    verifikoKupon
+    verifikoKupon,
+    getVleresimetProdukteve
 } = require('../controllers/klientPaneliController');
 const { verifyToken } = require('../middleware/authMiddleware');
 
@@ -33,6 +34,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
  *         description: Lista e menyve aktive
  */
 router.get('/menyte', verifyToken, getMenyteAktive);
+router.get('/vleresimet-produkteve', verifyToken, getVleresimetProdukteve);
 
 /**
  * @swagger
