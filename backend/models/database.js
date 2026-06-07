@@ -87,6 +87,30 @@ const createTables = async () => {
         `);
         console.log('Tabela refresh_tokens u krijua me sukses!');
 
+        // Tabela Permissions
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS permissions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                description TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Tabela permissions u krijua me sukses!');
+
+        // Tabela RolePermissions
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS role_permissions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                role_id INT NOT NULL,
+                permission_id INT NOT NULL,
+                FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+                FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_role_permission (role_id, permission_id)
+            )
+        `);
+        console.log('Tabela role_permissions u krijua me sukses!');
+
         console.log('------------------------------------');
         console.log('Te gjitha tabelat e identitetit u krijuan me sukses!');
 
@@ -308,8 +332,103 @@ const createTables = async () => {
         `);
         console.log('Tabela adresat u krijua me sukses!');
 
+        // Tabela AuditLogs
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT,
+                action VARCHAR(100) NOT NULL,
+                entity VARCHAR(100) NOT NULL,
+                entity_id INT,
+                old_value JSON,
+                new_value JSON,
+                ip_address VARCHAR(45),
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+            )
+        `);
+        console.log('Tabela audit_logs u krijua me sukses!');
+
+        // Tabela Notifications
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                type VARCHAR(50) NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                message TEXT,
+                is_read BOOLEAN DEFAULT FALSE,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log('Tabela notifications u krijua me sukses!');
+
+        // Tabela Settings
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                \`key\` VARCHAR(100) NOT NULL UNIQUE,
+                value TEXT,
+                description TEXT,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Tabela settings u krijua me sukses!');
+
+        // Tabela Files
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS files (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                entity VARCHAR(100) NOT NULL,
+                entity_id INT NOT NULL,
+                filename VARCHAR(255) NOT NULL,
+                file_path VARCHAR(500) NOT NULL,
+                file_size INT,
+                uploaded_by INT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+            )
+        `);
+        console.log('Tabela files u krijua me sukses!');
+
         console.log('------------------------------------');
-        console.log('Te gjitha 20 tabelat u krijuan me sukses!');
+        console.log('Te gjitha 26 tabelat u krijuan me sukses!');
+
+        // ==========================================
+        // SHTIMI I KOLONAVE created_at, updated_at, created_by, updated_by
+        // ==========================================
+
+        const tabelatPerKolona = [
+            'users', 'roles', 'user_roles', 'user_claims', 'user_tokens',
+            'klientet', 'kategorite', 'produktet', 'perberesit', 'produkt_perberesit',
+            'porosite', 'detajet_porosise', 'punonjesit', 'dergesat', 'menyte',
+            'meny_produktet', 'vleresimet', 'kuponat', 'adresat'
+        ];
+
+        const kolonatShtuese = [
+            { emri: 'created_at', tipi: 'DATETIME DEFAULT CURRENT_TIMESTAMP' },
+            { emri: 'updated_at', tipi: 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' },
+            { emri: 'created_by', tipi: 'INT NULL' },
+            { emri: 'updated_by', tipi: 'INT NULL' }
+        ];
+
+        for (const tabela of tabelatPerKolona) {
+            for (const kolona of kolonatShtuese) {
+                try {
+                    const [rows] = await db.query(
+                        `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = ? AND table_name = ? AND column_name = ?`,
+                        [process.env.DB_NAME, tabela, kolona.emri]
+                    );
+                    if (rows[0].cnt === 0) {
+                        await db.query(`ALTER TABLE ${tabela} ADD COLUMN ${kolona.emri} ${kolona.tipi}`);
+                    }
+                } catch (err) {
+                    // Kolona ekziston, vazhdo
+                }
+            }
+        }
+        console.log('Kolonat created_at, updated_at, created_by, updated_by u shtuan me sukses!');
 
         // ==========================================
         // INDEKSET PER PERFORMANCE
@@ -334,7 +453,17 @@ const createTables = async () => {
             { tabela: 'kuponat', emri: 'idx_kuponat_kodi', kolona: 'kodi' },
             { tabela: 'adresat', emri: 'idx_adresat_klient', kolona: 'klient_id' },
             { tabela: 'refresh_tokens', emri: 'idx_refresh_tokens_user', kolona: 'user_id' },
-            { tabela: 'refresh_tokens', emri: 'idx_refresh_tokens_token', kolona: 'token(255)' }
+            { tabela: 'refresh_tokens', emri: 'idx_refresh_tokens_token', kolona: 'token(255)' },
+            { tabela: 'permissions', emri: 'idx_permissions_name', kolona: 'name' },
+            { tabela: 'role_permissions', emri: 'idx_role_permissions_role', kolona: 'role_id' },
+            { tabela: 'role_permissions', emri: 'idx_role_permissions_perm', kolona: 'permission_id' },
+            { tabela: 'audit_logs', emri: 'idx_audit_logs_user', kolona: 'user_id' },
+            { tabela: 'audit_logs', emri: 'idx_audit_logs_entity', kolona: 'entity' },
+            { tabela: 'audit_logs', emri: 'idx_audit_logs_created', kolona: 'created_at' },
+            { tabela: 'notifications', emri: 'idx_notifications_user', kolona: 'user_id' },
+            { tabela: 'notifications', emri: 'idx_notifications_read', kolona: 'is_read' },
+            { tabela: 'files', emri: 'idx_files_entity', kolona: 'entity' },
+            { tabela: 'files', emri: 'idx_files_entity_id', kolona: 'entity_id' }
         ];
 
         for (const idx of indekset) {
