@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaPizzaSlice, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
     const { user, logout, isAdmin, isMenaxher } = useAuth();
@@ -95,7 +96,8 @@ const Navbar = () => {
 
                     {user && (
                         <div className="d-flex align-items-center">
-                            <span className="text-light me-3">
+                            <NotificationBell />
+                            <span className="text-light me-3 ms-2">
                                 <FaUser className="me-1" />
                                 {user.emri} {user.mbiemri}
                             </span>
