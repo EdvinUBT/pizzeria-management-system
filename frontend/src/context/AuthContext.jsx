@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import API from '../services/api';
+import socket from '../services/socket';
 
 const AuthContext = createContext();
 
@@ -12,7 +13,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
-            setUser(JSON.parse(savedUser));
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+
+            socket.connect();
+            socket.emit('join', parsedUser.id);
+            if (parsedUser.roles?.includes('admin') || parsedUser.roles?.includes('menaxher')) {
+                socket.emit('join_admin');
+            }
         }
         setLoading(false);
     }, []);
@@ -21,9 +29,16 @@ export const AuthProvider = ({ children }) => {
         const response = await API.post('/auth/login', { email, password });
         const { perdoruesi } = response.data;
 
-        // Ruaj vetem te dhenat e userit (jo tokenat!)
         localStorage.setItem('user', JSON.stringify(perdoruesi));
         setUser(perdoruesi);
+
+        // Lidhu me Socket.IO
+        socket.connect();
+        socket.emit('join', perdoruesi.id);
+        if (perdoruesi.roles?.includes('admin') || perdoruesi.roles?.includes('menaxher')) {
+            socket.emit('join_admin');
+        }
+
         return response.data;
     };
 
@@ -39,6 +54,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Gabim gjate logout:', error);
         }
 
+        socket.disconnect();
         localStorage.removeItem('user');
         setUser(null);
     };
