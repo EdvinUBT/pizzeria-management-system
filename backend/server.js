@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const db = require('./config/db');
 const createTables = require('./models/database');
+const connectMongoDB = require('./config/mongodb');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -96,6 +97,10 @@ const userTokensRoutes = require('./routes/userTokensRoutes');
 
 const klientPaneliRoutes = require('./routes/klientPaneliRoutes');
 
+const auditLogsRoutes = require('./routes/auditLogsRoutes');
+
+const notificationsRoutes = require('./routes/notificationsRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -142,10 +147,15 @@ app.use('/api/user-tokens', userTokensRoutes);
 
 app.use('/api/klient-paneli', klientPaneliRoutes);
 
+app.use('/api/audit-logs', auditLogsRoutes);
+
+app.use('/api/notifications', notificationsRoutes);
+
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
     console.log(`Serveri eshte duke u ekzekutuar ne portin ${PORT}`);
     await createTables();
+    await connectMongoDB();
 });
