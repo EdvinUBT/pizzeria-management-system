@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getKuponat, getKuponiMeKod, krijoKupon, perditesoKupon, aplikoKupon, fshiKupon } = require('../controllers/kuponatController');
+const { getKuponat, getKuponiMeKod, krijoKupon, perditesoKupon, aplikoKupon, fshiKupon, searchKuponat } = require('../controllers/kuponatController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const { validateKupon } = require('../middleware/validateMiddleware');
 
@@ -24,6 +24,63 @@ const { validateKupon } = require('../middleware/validateMiddleware');
  *         description: Lista e kuponave
  */
 router.get('/', verifyToken, verifyRole('admin', 'menaxher'), getKuponat);
+
+/**
+ * @swagger
+ * /api/kuponat/search:
+ *   get:
+ *     summary: Kerkim i avancuar i kuponave
+ *     tags: [Kuponat]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Kerko sipas kodit
+ *       - in: query
+ *         name: aktiv
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: zbritja_min
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: zbritja_max
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: data_nga
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: data_deri
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: i_skaduar
+ *         schema:
+ *           type: string
+ *           enum: ['true', 'false']
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [kodi, zbritja, data_fillimit, data_skadimit]
+ *       - in: query
+ *         name: sort_order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Rezultatet e kerkimit
+ */
+router.get('/search', verifyToken, verifyRole('admin', 'menaxher'), searchKuponat);
 
 /**
  * @swagger

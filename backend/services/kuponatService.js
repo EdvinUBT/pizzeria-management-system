@@ -84,6 +84,10 @@ const kuponatService = {
             throw { status: 404, message: 'Kuponi nuk u gjet' };
         }
         return await kuponatRepository.delete(id);
+    },
+
+    search: async (filters) => {
+        return await kuponatRepository.search(filters);
     }
 };
 

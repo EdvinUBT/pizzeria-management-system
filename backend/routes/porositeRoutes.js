@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPorosite, getPorosia, getPorositeEKlientit, krijoPorosi, perditesoStatusin, anuloPorosi, fshiPorosi } = require('../controllers/porositeController');
+const { getPorosite, getPorosia, getPorositeEKlientit, krijoPorosi, perditesoStatusin, anuloPorosi, fshiPorosi, searchPorosite } = require('../controllers/porositeController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const { validatePorosi } = require('../middleware/validateMiddleware');
 
@@ -22,12 +22,66 @@ const { validatePorosi } = require('../middleware/validateMiddleware');
  *     responses:
  *       200:
  *         description: Lista e porosive
- *       401:
- *         description: Tokeni mungon
- *       403:
- *         description: Nuk keni qasje
  */
 router.get('/', verifyToken, verifyRole('admin', 'menaxher'), getPorosite);
+
+/**
+ * @swagger
+ * /api/porosite/search:
+ *   get:
+ *     summary: Kerkim i avancuar i porosive
+ *     tags: [Porosite]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Kerko sipas emrit ose emailit te klientit
+ *       - in: query
+ *         name: statusi
+ *         schema:
+ *           type: string
+ *           enum: [ne_pritje, ne_pergatitje, gati, ne_dergim, dorezuar, anuluar]
+ *       - in: query
+ *         name: metoda_pageses
+ *         schema:
+ *           type: string
+ *           enum: [cash, karte, online]
+ *       - in: query
+ *         name: data_nga
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: data_deri
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: totali_min
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: totali_max
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [data, totali, statusi, klienti]
+ *       - in: query
+ *         name: sort_order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Rezultatet e kerkimit
+ */
+router.get('/search', verifyToken, verifyRole('admin', 'menaxher'), searchPorosite);
 
 /**
  * @swagger

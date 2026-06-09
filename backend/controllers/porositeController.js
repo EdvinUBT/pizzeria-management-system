@@ -93,4 +93,14 @@ const fshiPorosi = async (req, res) => {
     }
 };
 
-module.exports = { getPorosite, getPorosia, getPorositeEKlientit, krijoPorosi, perditesoStatusin, anuloPorosi, fshiPorosi };
+const searchPorosite = async (req, res) => {
+    try {
+        const te_dhena = await porositeService.search(req.query);
+        res.json({ sukses: true, te_dhena });
+    } catch (error) {
+        console.error('Gabim:', error);
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
+    }
+};
+
+module.exports = { getPorosite, getPorosia, getPorositeEKlientit, krijoPorosi, perditesoStatusin, anuloPorosi, fshiPorosi, searchPorosite };

@@ -56,6 +56,60 @@ const kuponatRepository = {
     delete: async (id) => {
         const [result] = await db.query('DELETE FROM kuponat WHERE kupon_id = ?', [id]);
         return result.affectedRows > 0;
+    },
+
+    search: async (filters = {}) => {
+        let query = `SELECT * FROM kuponat WHERE 1=1`;
+        const params = [];
+
+        if (filters.search) {
+            query += ` AND kodi LIKE ?`;
+            params.push(`%${filters.search}%`);
+        }
+
+        if (filters.aktiv !== undefined && filters.aktiv !== '') {
+            query += ` AND aktiv = ?`;
+            params.push(filters.aktiv);
+        }
+
+        if (filters.zbritja_min) {
+            query += ` AND zbritja_perqind >= ?`;
+            params.push(filters.zbritja_min);
+        }
+
+        if (filters.zbritja_max) {
+            query += ` AND zbritja_perqind <= ?`;
+            params.push(filters.zbritja_max);
+        }
+
+        if (filters.data_nga) {
+            query += ` AND data_fillimit >= ?`;
+            params.push(filters.data_nga);
+        }
+
+        if (filters.data_deri) {
+            query += ` AND data_skadimit <= ?`;
+            params.push(filters.data_deri);
+        }
+
+        if (filters.i_skaduar === 'true') {
+            query += ` AND data_skadimit < CURDATE()`;
+        } else if (filters.i_skaduar === 'false') {
+            query += ` AND data_skadimit >= CURDATE()`;
+        }
+
+        const sortFields = {
+            'kodi': 'kodi',
+            'zbritja': 'zbritja_perqind',
+            'data_fillimit': 'data_fillimit',
+            'data_skadimit': 'data_skadimit'
+        };
+        const sortField = sortFields[filters.sort_by] || 'kupon_id';
+        const sortOrder = filters.sort_order === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+        const [rows] = await db.query(query, params);
+        return rows;
     }
 };
 

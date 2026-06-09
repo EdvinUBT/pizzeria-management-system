@@ -69,4 +69,14 @@ const fshiKupon = async (req, res) => {
     }
 };
 
-module.exports = { getKuponat, getKuponiMeKod, krijoKupon, perditesoKupon, aplikoKupon, fshiKupon };
+const searchKuponat = async (req, res) => {
+    try {
+        const te_dhena = await kuponatService.search(req.query);
+        res.json({ sukses: true, te_dhena });
+    } catch (error) {
+        console.error('Gabim:', error);
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
+    }
+};
+
+module.exports = { getKuponat, getKuponiMeKod, krijoKupon, perditesoKupon, aplikoKupon, fshiKupon, searchKuponat };
