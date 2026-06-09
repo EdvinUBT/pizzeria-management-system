@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaTag, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import ExportImport from '../components/ExportImport';
 
 const Kuponat = () => {
     const [kuponat, setKuponat] = useState([]);
@@ -191,6 +192,8 @@ const Kuponat = () => {
                     </div>
                 </div>
             )}
+
+            <ExportImport entity="kuponat" entityLabel="Kuponat" onImportSuccess={fetchKuponat} />
 
             {/* Kerkim i Avancuar */}
             <div className="card shadow-sm mb-3">
