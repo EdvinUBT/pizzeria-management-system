@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaUserTie, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import ExportImport from '../components/ExportImport';
 
 const Punonjesit = () => {
     const [punonjesit, setPunonjesit] = useState([]);
@@ -187,6 +188,8 @@ const Punonjesit = () => {
                     </div>
                 </div>
             )}
+
+            <ExportImport entity="punonjesit" entityLabel="Punonjesit" onImportSuccess={fetchPunonjesit} />
 
             {/* Kerkim i Avancuar */}
             <div className="card shadow-sm mb-3">

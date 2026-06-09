@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
 import { FaPlus, FaEdit, FaTrash, FaPizzaSlice, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import ExportImport from '../components/ExportImport';
 
 const Produktet = () => {
     const [produktet, setProduktet] = useState([]);
@@ -198,6 +199,8 @@ const Produktet = () => {
                     </div>
                 </div>
             )}
+
+            <ExportImport entity="produktet" entityLabel="Produktet" onImportSuccess={fetchProduktet} />
 
             {/* Kerkim i Avancuar */}
             <div className="card shadow-sm mb-3">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
 import { FaPlus, FaEye, FaTrash, FaShoppingCart, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import ExportImport from '../components/ExportImport';
 
 const Porosite = () => {
     const [porosite, setPorosite] = useState([]);
@@ -315,6 +316,8 @@ const Porosite = () => {
                     </div>
                 </div>
             )}
+
+            <ExportImport entity="porosite" entityLabel="Porosite" onImportSuccess={fetchPorosite} />
 
             {/* Kerkim i Avancuar */}
             <div className="card shadow-sm mb-3">
