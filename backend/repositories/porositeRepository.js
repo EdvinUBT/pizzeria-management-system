@@ -69,6 +69,64 @@ const porositeRepository = {
     delete: async (id) => {
         const [result] = await db.query('DELETE FROM porosite WHERE porosi_id = ?', [id]);
         return result.affectedRows > 0;
+    },
+
+    search: async (filters = {}) => {
+        let query = `
+            SELECT p.*, k.emri, k.mbiemri, k.email, k.telefoni
+            FROM porosite p
+            LEFT JOIN klientet k ON p.klient_id = k.klient_id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (filters.search) {
+            query += ` AND (k.emri LIKE ? OR k.mbiemri LIKE ? OR k.email LIKE ?)`;
+            params.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`);
+        }
+
+        if (filters.statusi) {
+            query += ` AND p.statusi = ?`;
+            params.push(filters.statusi);
+        }
+
+        if (filters.metoda_pageses) {
+            query += ` AND p.metoda_pageses = ?`;
+            params.push(filters.metoda_pageses);
+        }
+
+        if (filters.data_nga) {
+            query += ` AND p.data_porosise >= ?`;
+            params.push(filters.data_nga);
+        }
+
+        if (filters.data_deri) {
+            query += ` AND p.data_porosise <= ?`;
+            params.push(filters.data_deri);
+        }
+
+        if (filters.totali_min) {
+            query += ` AND p.totali >= ?`;
+            params.push(filters.totali_min);
+        }
+
+        if (filters.totali_max) {
+            query += ` AND p.totali <= ?`;
+            params.push(filters.totali_max);
+        }
+
+        const sortFields = {
+            'data': 'p.data_porosise',
+            'totali': 'p.totali',
+            'statusi': 'p.statusi',
+            'klienti': 'k.emri'
+        };
+        const sortField = sortFields[filters.sort_by] || 'p.data_porosise';
+        const sortOrder = filters.sort_order === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+        const [rows] = await db.query(query, params);
+        return rows;
     }
 };
 

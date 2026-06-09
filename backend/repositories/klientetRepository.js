@@ -35,6 +35,39 @@ const klientetRepository = {
     delete: async (id) => {
         const [result] = await db.query('DELETE FROM klientet WHERE klient_id = ?', [id]);
         return result.affectedRows > 0;
+    },
+
+    search: async (filters = {}) => {
+        let query = `SELECT klient_id, emri, mbiemri, email, telefoni, adresa, data_regjistrimit FROM klientet WHERE 1=1`;
+        const params = [];
+
+        if (filters.search) {
+            query += ` AND (emri LIKE ? OR mbiemri LIKE ? OR email LIKE ? OR telefoni LIKE ?)`;
+            params.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`);
+        }
+
+        if (filters.data_nga) {
+            query += ` AND data_regjistrimit >= ?`;
+            params.push(filters.data_nga);
+        }
+
+        if (filters.data_deri) {
+            query += ` AND data_regjistrimit <= ?`;
+            params.push(filters.data_deri);
+        }
+
+        const sortFields = {
+            'emri': 'emri',
+            'mbiemri': 'mbiemri',
+            'email': 'email',
+            'data': 'data_regjistrimit'
+        };
+        const sortField = sortFields[filters.sort_by] || 'klient_id';
+        const sortOrder = filters.sort_order === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+        const [rows] = await db.query(query, params);
+        return rows;
     }
 };
 

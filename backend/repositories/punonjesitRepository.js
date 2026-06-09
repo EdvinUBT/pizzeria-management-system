@@ -30,6 +30,39 @@ const punonjesitRepository = {
     delete: async (id) => {
         const [result] = await db.query('DELETE FROM punonjesit WHERE punonjes_id = ?', [id]);
         return result.affectedRows > 0;
+    },
+
+    search: async (filters = {}) => {
+        let query = `SELECT * FROM punonjesit WHERE 1=1`;
+        const params = [];
+
+        if (filters.search) {
+            query += ` AND (emri LIKE ? OR mbiemri LIKE ? OR email LIKE ? OR telefoni LIKE ?)`;
+            params.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`);
+        }
+
+        if (filters.roli) {
+            query += ` AND roli = ?`;
+            params.push(filters.roli);
+        }
+
+        if (filters.aktiv !== undefined && filters.aktiv !== '') {
+            query += ` AND aktiv = ?`;
+            params.push(filters.aktiv);
+        }
+
+        const sortFields = {
+            'emri': 'emri',
+            'mbiemri': 'mbiemri',
+            'roli': 'roli',
+            'email': 'email'
+        };
+        const sortField = sortFields[filters.sort_by] || 'punonjes_id';
+        const sortOrder = filters.sort_order === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+        const [rows] = await db.query(query, params);
+        return rows;
     }
 };
 

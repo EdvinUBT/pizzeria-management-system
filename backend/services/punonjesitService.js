@@ -48,6 +48,10 @@ const punonjesitService = {
             throw { status: 404, message: 'Punonjesi nuk u gjet' };
         }
         return await punonjesitRepository.delete(id);
+    },
+
+    search: async (filters) => {
+        return await punonjesitRepository.search(filters);
     }
 };
 

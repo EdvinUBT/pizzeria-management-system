@@ -56,6 +56,10 @@ const klientetService = {
             throw { status: 404, message: 'Klienti nuk u gjet' };
         }
         return await klientetRepository.delete(id);
+    },
+
+    search: async (filters) => {
+        return await klientetRepository.search(filters);
     }
 };
 

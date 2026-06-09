@@ -70,4 +70,15 @@ const fshiProdukt = async (req, res) => {
     }
 };
 
-module.exports = { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt };
+// Kerkim i avancuar
+const searchProduktet = async (req, res) => {
+    try {
+        const te_dhena = await produktetService.search(req.query);
+        res.json({ sukses: true, te_dhena });
+    } catch (error) {
+        console.error('Gabim:', error);
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
+    }
+};
+
+module.exports = { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt, searchProduktet };

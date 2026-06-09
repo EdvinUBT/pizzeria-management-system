@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPunonjesit, getPunonjesi, krijoPunonjes, perditesoPunonjes, fshiPunonjes } = require('../controllers/punonjesitController');
+const { getPunonjesit, getPunonjesi, krijoPunonjes, perditesoPunonjes, fshiPunonjes, searchPunonjesit } = require('../controllers/punonjesitController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const { validatePunonjes } = require('../middleware/validateMiddleware');
 
@@ -24,6 +24,43 @@ const { validatePunonjes } = require('../middleware/validateMiddleware');
  *         description: Lista e punonjesve
  */
 router.get('/', verifyToken, verifyRole('admin', 'menaxher'), getPunonjesit);
+
+/**
+ * @swagger
+ * /api/punonjesit/search:
+ *   get:
+ *     summary: Kerkim i avancuar i punonjesve
+ *     tags: [Punonjesit]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: roli
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: aktiv
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [emri, mbiemri, roli, email]
+ *       - in: query
+ *         name: sort_order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Rezultatet e kerkimit
+ */
+router.get('/search', verifyToken, verifyRole('admin', 'menaxher'), searchPunonjesit);
 
 /**
  * @swagger

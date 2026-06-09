@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt } = require('../controllers/produktetController');
+const { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt, searchProduktet } = require('../controllers/produktetController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const { validateProdukt } = require('../middleware/validateMiddleware');
 
@@ -22,6 +22,50 @@ const { validateProdukt } = require('../middleware/validateMiddleware');
  *         description: Lista e produkteve
  */
 router.get('/', getProduktet);
+
+/**
+ * @swagger
+ * /api/produktet/search:
+ *   get:
+ *     summary: Kerkim i avancuar i produkteve
+ *     tags: [Produktet]
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Kerko sipas emrit ose pershkrimit
+ *       - in: query
+ *         name: kategori_id
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: cmimi_min
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: cmimi_max
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: aktive
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [emri, cmimi, data, kategoria]
+ *       - in: query
+ *         name: sort_order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Rezultatet e kerkimit
+ */
+router.get('/search', searchProduktet);
 
 /**
  * @swagger

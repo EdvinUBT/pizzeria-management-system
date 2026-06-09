@@ -73,6 +73,10 @@ const porositeService = {
             throw { status: 404, message: 'Porosia nuk u gjet' };
         }
         return await porositeRepository.delete(id);
+    },
+
+    search: async (filters) => {
+        return await porositeRepository.search(filters);
     }
 };
 

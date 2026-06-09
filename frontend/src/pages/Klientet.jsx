@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
-import { FaPlus, FaEdit, FaTrash, FaUsers, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaUsers, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 
 const Klientet = () => {
     const [klientet, setKlientet] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [currentId, setCurrentId] = useState(null);
-    const [search, setSearch] = useState('');
+    const [filters, setFilters] = useState({
+        search: '',
+        data_nga: '',
+        data_deri: '',
+        sort_by: '',
+        sort_order: 'desc'
+    });
     const [formData, setFormData] = useState({
         emri: '',
         mbiemri: '',
@@ -21,12 +28,20 @@ const Klientet = () => {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        fetchKlientet();
-    }, []);
+        const timeout = setTimeout(() => {
+            fetchKlientet();
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [filters]);
 
     const fetchKlientet = async () => {
         try {
-            const response = await API.get('/klientet');
+            setLoading(true);
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== '' && value !== undefined) params.append(key, value);
+            });
+            const response = await API.get(`/klientet/search?${params.toString()}`);
             setKlientet(response.data.te_dhena);
         } catch (error) {
             console.error('Gabim:', error);
@@ -34,6 +49,16 @@ const Klientet = () => {
             setLoading(false);
         }
     };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const clearFilters = () => {
+        setFilters({ search: '', data_nga: '', data_deri: '', sort_by: '', sort_order: 'desc' });
+    };
+
+    const activeFilterCount = Object.entries(filters).filter(([key, value]) => value !== '' && key !== 'sort_order').length;
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -95,22 +120,6 @@ const Klientet = () => {
         setShowForm(false);
     };
 
-    const filteredKlientet = klientet.filter(k => {
-        return k.emri.toLowerCase().includes(search.toLowerCase()) ||
-            k.mbiemri.toLowerCase().includes(search.toLowerCase()) ||
-            k.email.toLowerCase().includes(search.toLowerCase());
-    });
-
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center mt-5">
-                <div className="spinner-border text-danger" role="status">
-                    <span className="visually-hidden">Duke u ngarkuar...</span>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="container-fluid mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -163,52 +172,101 @@ const Klientet = () => {
                 </div>
             )}
 
-            <div className="row mb-3">
-                <div className="col-md-4">
-                    <div className="input-group">
-                        <span className="input-group-text"><FaSearch /></span>
-                        <input type="text" className="form-control" placeholder="Kerko klient..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            {/* Kerkim i Avancuar */}
+            <div className="card shadow-sm mb-3">
+                <div className="card-body pb-2">
+                    <div className="row align-items-center">
+                        <div className="col-md-5">
+                            <div className="input-group">
+                                <span className="input-group-text"><FaSearch /></span>
+                                <input type="text" className="form-control" placeholder="Kerko sipas emrit, mbiemrit, emailit ose telefonit..." name="search" value={filters.search} onChange={handleFilterChange} />
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <select className="form-select" name="sort_by" value={filters.sort_by} onChange={handleFilterChange}>
+                                <option value="">Rendit sipas...</option>
+                                <option value="emri">Emri</option>
+                                <option value="mbiemri">Mbiemri</option>
+                                <option value="email">Email</option>
+                                <option value="data">Data Regjistrimit</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2 d-flex gap-1">
+                            <button className={`btn btn-sm ${filters.sort_order === 'asc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'asc' })}>↑</button>
+                            <button className={`btn btn-sm ${filters.sort_order === 'desc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'desc' })}>↓</button>
+                            <button className={`btn btn-sm ${showFilters ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => setShowFilters(!showFilters)}>
+                                <FaFilter /> {activeFilterCount > 0 && <span className="badge bg-danger ms-1">{activeFilterCount}</span>}
+                            </button>
+                            {activeFilterCount > 0 && (
+                                <button className="btn btn-sm btn-outline-secondary" onClick={clearFilters}><FaTimes /></button>
+                            )}
+                        </div>
                     </div>
+
+                    {showFilters && (
+                        <div className="row mt-3 pt-3 border-top">
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label small">Regjistruar Nga</label>
+                                <input type="date" className="form-control form-control-sm" name="data_nga" value={filters.data_nga} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label small">Regjistruar Deri</label>
+                                <input type="date" className="form-control form-control-sm" name="data_deri" value={filters.data_deri} onChange={handleFilterChange} />
+                            </div>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <small className="text-muted">{klientet.length} kliente te gjetur</small>
             </div>
 
             <div className="card shadow-sm">
                 <div className="card-body">
-                    <table className="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Emri</th>
-                                <th>Mbiemri</th>
-                                <th>Email</th>
-                                <th>Telefoni</th>
-                                <th>Adresa</th>
-                                <th>Data Regjistrimit</th>
-                                <th>Veprimet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredKlientet.length > 0 ? (
-                                filteredKlientet.map((k) => (
-                                    <tr key={k.klient_id}>
-                                        <td>{k.klient_id}</td>
-                                        <td>{k.emri}</td>
-                                        <td>{k.mbiemri}</td>
-                                        <td>{k.email}</td>
-                                        <td>{k.telefoni || '-'}</td>
-                                        <td>{k.adresa || '-'}</td>
-                                        <td>{new Date(k.data_regjistrimit).toLocaleDateString('sq-AL')}</td>
-                                        <td>
-                                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleEdit(k)}><FaEdit /></button>
-                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(k.klient_id)}><FaTrash /></button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr><td colSpan="8" className="text-center text-muted">Nuk ka kliente ende</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                    {loading ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-danger" role="status">
+                                <span className="visually-hidden">Duke u ngarkuar...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <table className="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Emri</th>
+                                    <th>Mbiemri</th>
+                                    <th>Email</th>
+                                    <th>Telefoni</th>
+                                    <th>Adresa</th>
+                                    <th>Data Regjistrimit</th>
+                                    <th>Veprimet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {klientet.length > 0 ? (
+                                    klientet.map((k) => (
+                                        <tr key={k.klient_id}>
+                                            <td>{k.klient_id}</td>
+                                            <td>{k.emri}</td>
+                                            <td>{k.mbiemri}</td>
+                                            <td>{k.email}</td>
+                                            <td>{k.telefoni || '-'}</td>
+                                            <td>{k.adresa || '-'}</td>
+                                            <td>{new Date(k.data_regjistrimit).toLocaleDateString('sq-AL')}</td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleEdit(k)}><FaEdit /></button>
+                                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(k.klient_id)}><FaTrash /></button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan="8" className="text-center text-muted">Nuk ka kliente te gjetur</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
         </div>

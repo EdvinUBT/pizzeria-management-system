@@ -54,6 +54,10 @@ const produktetService = {
             throw { status: 404, message: 'Produkti nuk u gjet' };
         }
         return await produktetRepository.delete(id);
+    },
+
+    search: async (filters) => {
+        return await produktetRepository.search(filters);
     }
 };
 

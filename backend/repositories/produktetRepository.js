@@ -51,6 +51,54 @@ const produktetRepository = {
     delete: async (id) => {
         const [result] = await db.query('DELETE FROM produktet WHERE produkt_id = ?', [id]);
         return result.affectedRows > 0;
+    },
+
+    search: async (filters = {}) => {
+        let query = `
+            SELECT p.*, k.emri_kategorise 
+            FROM produktet p
+            LEFT JOIN kategorite k ON p.kategori_id = k.kategori_id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (filters.search) {
+            query += ` AND (p.emri_produktit LIKE ? OR p.pershkrimi LIKE ?)`;
+            params.push(`%${filters.search}%`, `%${filters.search}%`);
+        }
+
+        if (filters.kategori_id) {
+            query += ` AND p.kategori_id = ?`;
+            params.push(filters.kategori_id);
+        }
+
+        if (filters.cmimi_min) {
+            query += ` AND p.cmimi_baze >= ?`;
+            params.push(filters.cmimi_min);
+        }
+
+        if (filters.cmimi_max) {
+            query += ` AND p.cmimi_baze <= ?`;
+            params.push(filters.cmimi_max);
+        }
+
+        if (filters.aktive !== undefined && filters.aktive !== '') {
+            query += ` AND p.aktive = ?`;
+            params.push(filters.aktive);
+        }
+
+        const sortFields = {
+            'emri': 'p.emri_produktit',
+            'cmimi': 'p.cmimi_baze',
+            'data': 'p.created_at',
+            'kategoria': 'k.emri_kategorise'
+        };
+        const sortField = sortFields[filters.sort_by] || 'p.produkt_id';
+        const sortOrder = filters.sort_order === 'asc' ? 'ASC' : 'DESC';
+        query += ` ORDER BY ${sortField} ${sortOrder}`;
+
+        const [rows] = await db.query(query, params);
+        return rows;
     }
 };
 
