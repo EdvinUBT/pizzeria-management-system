@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
-import { FaPlus, FaEdit, FaTrash, FaPizzaSlice, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaPizzaSlice, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 
 const Produktet = () => {
     const [produktet, setProduktet] = useState([]);
     const [kategorite, setKategorite] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [currentId, setCurrentId] = useState(null);
-    const [search, setSearch] = useState('');
-    const [filterKategori, setFilterKategori] = useState('');
+    const [filters, setFilters] = useState({
+        search: '',
+        kategori_id: '',
+        cmimi_min: '',
+        cmimi_max: '',
+        aktive: '',
+        sort_by: '',
+        sort_order: 'desc'
+    });
     const [formData, setFormData] = useState({
         kategori_id: '',
         emri_produktit: '',
@@ -24,13 +32,24 @@ const Produktet = () => {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        fetchProduktet();
         fetchKategorite();
     }, []);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            fetchProduktet();
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [filters]);
+
     const fetchProduktet = async () => {
         try {
-            const response = await API.get('/produktet');
+            setLoading(true);
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== '' && value !== undefined) params.append(key, value);
+            });
+            const response = await API.get(`/produktet/search?${params.toString()}`);
             setProduktet(response.data.te_dhena);
         } catch (error) {
             console.error('Gabim:', error);
@@ -47,6 +66,16 @@ const Produktet = () => {
             console.error('Gabim:', error);
         }
     };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const clearFilters = () => {
+        setFilters({ search: '', kategori_id: '', cmimi_min: '', cmimi_max: '', aktive: '', sort_by: '', sort_order: 'desc' });
+    };
+
+    const activeFilterCount = Object.entries(filters).filter(([key, value]) => value !== '' && key !== 'sort_order').length;
 
     const handleChange = (e) => {
         const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -109,23 +138,6 @@ const Produktet = () => {
         setShowForm(false);
     };
 
-    // Filtro produktet
-    const filteredProduktet = produktet.filter(p => {
-        const matchSearch = p.emri_produktit.toLowerCase().includes(search.toLowerCase());
-        const matchKategori = filterKategori ? p.kategori_id === parseInt(filterKategori) : true;
-        return matchSearch && matchKategori;
-    });
-
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center mt-5">
-                <div className="spinner-border text-danger" role="status">
-                    <span className="visually-hidden">Duke u ngarkuar...</span>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="container-fluid mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -187,70 +199,125 @@ const Produktet = () => {
                 </div>
             )}
 
-            {/* Filtrat */}
-            <div className="row mb-3">
-                <div className="col-md-4">
-                    <div className="input-group">
-                        <span className="input-group-text"><FaSearch /></span>
-                        <input type="text" className="form-control" placeholder="Kerko produkt..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            {/* Kerkim i Avancuar */}
+            <div className="card shadow-sm mb-3">
+                <div className="card-body pb-2">
+                    <div className="row align-items-center">
+                        <div className="col-md-5">
+                            <div className="input-group">
+                                <span className="input-group-text"><FaSearch /></span>
+                                <input type="text" className="form-control" placeholder="Kerko sipas emrit ose pershkrimit..." name="search" value={filters.search} onChange={handleFilterChange} />
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <select className="form-select" name="kategori_id" value={filters.kategori_id} onChange={handleFilterChange}>
+                                <option value="">Te gjitha kategorite</option>
+                                {kategorite.map(k => (
+                                    <option key={k.kategori_id} value={k.kategori_id}>{k.emri_kategorise}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <select className="form-select" name="sort_by" value={filters.sort_by} onChange={handleFilterChange}>
+                                <option value="">Rendit sipas...</option>
+                                <option value="emri">Emri</option>
+                                <option value="cmimi">Cmimi</option>
+                                <option value="kategoria">Kategoria</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2 d-flex gap-1">
+                            <button className={`btn btn-sm ${filters.sort_order === 'asc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'asc' })}>↑</button>
+                            <button className={`btn btn-sm ${filters.sort_order === 'desc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'desc' })}>↓</button>
+                            <button className={`btn btn-sm ${showFilters ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => setShowFilters(!showFilters)}>
+                                <FaFilter /> {activeFilterCount > 0 && <span className="badge bg-danger ms-1">{activeFilterCount}</span>}
+                            </button>
+                            {activeFilterCount > 0 && (
+                                <button className="btn btn-sm btn-outline-secondary" onClick={clearFilters}><FaTimes /></button>
+                            )}
+                        </div>
                     </div>
+
+                    {showFilters && (
+                        <div className="row mt-3 pt-3 border-top">
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label small">Cmimi Min (€)</label>
+                                <input type="number" step="0.01" className="form-control form-control-sm" name="cmimi_min" value={filters.cmimi_min} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label small">Cmimi Max (€)</label>
+                                <input type="number" step="0.01" className="form-control form-control-sm" name="cmimi_max" value={filters.cmimi_max} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label small">Statusi</label>
+                                <select className="form-select form-select-sm" name="aktive" value={filters.aktive} onChange={handleFilterChange}>
+                                    <option value="">Te gjitha</option>
+                                    <option value="1">Aktive</option>
+                                    <option value="0">Joaktive</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                <div className="col-md-3">
-                    <select className="form-select" value={filterKategori} onChange={(e) => setFilterKategori(e.target.value)}>
-                        <option value="">Te gjitha kategorite</option>
-                        {kategorite.map(k => (
-                            <option key={k.kategori_id} value={k.kategori_id}>{k.emri_kategorise}</option>
-                        ))}
-                    </select>
-                </div>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <small className="text-muted">{produktet.length} produkte te gjetura</small>
             </div>
 
             <div className="card shadow-sm">
                 <div className="card-body">
-                    <table className="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Emri</th>
-                                <th>Kategoria</th>
-                                <th>Cmimi</th>
-                                <th>Koha</th>
-                                <th>Statusi</th>
-                                <th>Veprimet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredProduktet.length > 0 ? (
-                                filteredProduktet.map((p) => (
-                                    <tr key={p.produkt_id}>
-                                        <td>{p.produkt_id}</td>
-                                        <td className="d-flex align-items-center">
-                                            {p.foto_url && (
-                                                <img src={p.foto_url} alt={p.emri_produktit} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', marginRight: '10px' }} />
-                                            )}
-                                            {p.emri_produktit}
-                                        </td>
-                                        <td><span className="badge bg-info">{p.emri_kategorise}</span></td>
-                                        <td>{p.cmimi_baze} €</td>
-                                        <td>{p.koha_pergatitjes_min} min</td>
-                                        <td>
-                                            <span className={`badge ${p.aktive ? 'bg-success' : 'bg-secondary'}`}>
-                                                {p.aktive ? 'Aktive' : 'Joaktive'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleEdit(p)}><FaEdit /></button>
-                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.produkt_id)}><FaTrash /></button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
+                    {loading ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-danger" role="status">
+                                <span className="visually-hidden">Duke u ngarkuar...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <table className="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td colSpan="7" className="text-center text-muted">Nuk ka produkte ende</td>
+                                    <th>ID</th>
+                                    <th>Emri</th>
+                                    <th>Kategoria</th>
+                                    <th>Cmimi</th>
+                                    <th>Koha</th>
+                                    <th>Statusi</th>
+                                    <th>Veprimet</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {produktet.length > 0 ? (
+                                    produktet.map((p) => (
+                                        <tr key={p.produkt_id}>
+                                            <td>{p.produkt_id}</td>
+                                            <td className="d-flex align-items-center">
+                                                {p.foto_url && (
+                                                    <img src={p.foto_url} alt={p.emri_produktit} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', marginRight: '10px' }} />
+                                                )}
+                                                {p.emri_produktit}
+                                            </td>
+                                            <td><span className="badge bg-info">{p.emri_kategorise}</span></td>
+                                            <td>{p.cmimi_baze} €</td>
+                                            <td>{p.koha_pergatitjes_min} min</td>
+                                            <td>
+                                                <span className={`badge ${p.aktive ? 'bg-success' : 'bg-secondary'}`}>
+                                                    {p.aktive ? 'Aktive' : 'Joaktive'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleEdit(p)}><FaEdit /></button>
+                                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.produkt_id)}><FaTrash /></button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" className="text-center text-muted">Nuk ka produkte te gjetura</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
         </div>

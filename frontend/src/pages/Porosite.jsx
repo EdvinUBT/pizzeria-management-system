@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
-import { FaPlus, FaEye, FaTrash, FaShoppingCart, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaEye, FaTrash, FaShoppingCart, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 
 const Porosite = () => {
     const [porosite, setPorosite] = useState([]);
@@ -9,7 +9,18 @@ const Porosite = () => {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [showDetails, setShowDetails] = useState(null);
-    const [filterStatus, setFilterStatus] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        search: '',
+        statusi: '',
+        metoda_pageses: '',
+        data_nga: '',
+        data_deri: '',
+        totali_min: '',
+        totali_max: '',
+        sort_by: '',
+        sort_order: 'desc'
+    });
     const [formData, setFormData] = useState({
         klient_id: '',
         metoda_pageses: 'cash',
@@ -21,14 +32,25 @@ const Porosite = () => {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        fetchPorosite();
         fetchKlientet();
         fetchProduktet();
     }, []);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            fetchPorosite();
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [filters]);
+
     const fetchPorosite = async () => {
         try {
-            const response = await API.get('/porosite');
+            setLoading(true);
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== '' && value !== undefined) params.append(key, value);
+            });
+            const response = await API.get(`/porosite/search?${params.toString()}`);
             setPorosite(response.data.te_dhena);
         } catch (error) {
             console.error('Gabim:', error);
@@ -55,6 +77,16 @@ const Porosite = () => {
         }
     };
 
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const clearFilters = () => {
+        setFilters({ search: '', statusi: '', metoda_pageses: '', data_nga: '', data_deri: '', totali_min: '', totali_max: '', sort_by: '', sort_order: 'desc' });
+    };
+
+    const activeFilterCount = Object.entries(filters).filter(([key, value]) => value !== '' && key !== 'sort_order').length;
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -63,7 +95,6 @@ const Porosite = () => {
         const newDetajet = [...formData.detajet];
         newDetajet[index][field] = value;
 
-        // Auto-fill cmimi kur zgjedhet produkti
         if (field === 'produkt_id') {
             const produkt = produktet.find(p => p.produkt_id === parseInt(value));
             if (produkt) {
@@ -149,10 +180,6 @@ const Porosite = () => {
         return formData.detajet.reduce((total, d) => total + (d.sasia * d.cmimi_njesi || 0), 0).toFixed(2);
     };
 
-    const filteredPorosite = porosite.filter(p => {
-        return filterStatus ? p.statusi === filterStatus : true;
-    });
-
     const getStatusBadge = (statusi) => {
         const classes = {
             'ne_pritje': 'bg-warning text-dark',
@@ -164,16 +191,6 @@ const Porosite = () => {
         };
         return classes[statusi] || 'bg-secondary';
     };
-
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center mt-5">
-                <div className="spinner-border text-danger" role="status">
-                    <span className="visually-hidden">Duke u ngarkuar...</span>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="container-fluid mt-4">
@@ -261,7 +278,6 @@ const Porosite = () => {
                 </div>
             )}
 
-            {/* Detajet e porosise - Modal */}
             {showDetails && (
                 <div className="card shadow-sm mb-4 border-primary">
                     <div className="card-header bg-primary text-white d-flex justify-content-between">
@@ -300,65 +316,136 @@ const Porosite = () => {
                 </div>
             )}
 
-            {/* Filtri */}
-            <div className="row mb-3">
-                <div className="col-md-3">
-                    <select className="form-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                        <option value="">Te gjitha statuset</option>
-                        <option value="ne_pritje">Ne Pritje</option>
-                        <option value="ne_pergatitje">Ne Pergatitje</option>
-                        <option value="gati">Gati</option>
-                        <option value="ne_dergim">Ne Dergim</option>
-                        <option value="dorezuar">Dorezuar</option>
-                        <option value="anuluar">Anuluar</option>
-                    </select>
+            {/* Kerkim i Avancuar */}
+            <div className="card shadow-sm mb-3">
+                <div className="card-body pb-2">
+                    <div className="row align-items-center">
+                        <div className="col-md-4">
+                            <div className="input-group">
+                                <span className="input-group-text"><FaSearch /></span>
+                                <input type="text" className="form-control" placeholder="Kerko sipas klientit..." name="search" value={filters.search} onChange={handleFilterChange} />
+                            </div>
+                        </div>
+                        <div className="col-md-2">
+                            <select className="form-select" name="statusi" value={filters.statusi} onChange={handleFilterChange}>
+                                <option value="">Te gjitha statuset</option>
+                                <option value="ne_pritje">Ne Pritje</option>
+                                <option value="ne_pergatitje">Ne Pergatitje</option>
+                                <option value="gati">Gati</option>
+                                <option value="ne_dergim">Ne Dergim</option>
+                                <option value="dorezuar">Dorezuar</option>
+                                <option value="anuluar">Anuluar</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <select className="form-select" name="sort_by" value={filters.sort_by} onChange={handleFilterChange}>
+                                <option value="">Rendit sipas...</option>
+                                <option value="data">Data</option>
+                                <option value="totali">Totali</option>
+                                <option value="statusi">Statusi</option>
+                                <option value="klienti">Klienti</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2 d-flex gap-1">
+                            <button className={`btn btn-sm ${filters.sort_order === 'asc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'asc' })}>↑</button>
+                            <button className={`btn btn-sm ${filters.sort_order === 'desc' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => setFilters({ ...filters, sort_order: 'desc' })}>↓</button>
+                            <button className={`btn btn-sm ${showFilters ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => setShowFilters(!showFilters)}>
+                                <FaFilter /> {activeFilterCount > 0 && <span className="badge bg-danger ms-1">{activeFilterCount}</span>}
+                            </button>
+                            {activeFilterCount > 0 && (
+                                <button className="btn btn-sm btn-outline-secondary" onClick={clearFilters}><FaTimes /></button>
+                            )}
+                        </div>
+                    </div>
+
+                    {showFilters && (
+                        <div className="row mt-3 pt-3 border-top">
+                            <div className="col-md-2 mb-2">
+                                <label className="form-label small">Metoda Pageses</label>
+                                <select className="form-select form-select-sm" name="metoda_pageses" value={filters.metoda_pageses} onChange={handleFilterChange}>
+                                    <option value="">Te gjitha</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="karte">Karte</option>
+                                    <option value="online">Online</option>
+                                </select>
+                            </div>
+                            <div className="col-md-2 mb-2">
+                                <label className="form-label small">Data Nga</label>
+                                <input type="date" className="form-control form-control-sm" name="data_nga" value={filters.data_nga} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-2 mb-2">
+                                <label className="form-label small">Data Deri</label>
+                                <input type="date" className="form-control form-control-sm" name="data_deri" value={filters.data_deri} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-2 mb-2">
+                                <label className="form-label small">Totali Min (€)</label>
+                                <input type="number" step="0.01" className="form-control form-control-sm" name="totali_min" value={filters.totali_min} onChange={handleFilterChange} />
+                            </div>
+                            <div className="col-md-2 mb-2">
+                                <label className="form-label small">Totali Max (€)</label>
+                                <input type="number" step="0.01" className="form-control form-control-sm" name="totali_max" value={filters.totali_max} onChange={handleFilterChange} />
+                            </div>
+                        </div>
+                    )}
                 </div>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <small className="text-muted">{porosite.length} porosi te gjetura</small>
             </div>
 
             <div className="card shadow-sm">
                 <div className="card-body">
-                    <table className="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Klienti</th>
-                                <th>Data</th>
-                                <th>Totali</th>
-                                <th>Pagesa</th>
-                                <th>Statusi</th>
-                                <th>Veprimet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPorosite.length > 0 ? (
-                                filteredPorosite.map((p) => (
-                                    <tr key={p.porosi_id}>
-                                        <td>#{p.porosi_id}</td>
-                                        <td>{p.emri} {p.mbiemri}</td>
-                                        <td>{new Date(p.data_porosise).toLocaleDateString('sq-AL')}</td>
-                                        <td>{p.totali} €</td>
-                                        <td>{p.metoda_pageses}</td>
-                                        <td>
-                                            <select className="form-select form-select-sm" style={{ width: '140px' }} value={p.statusi} onChange={(e) => handleStatusChange(p.porosi_id, e.target.value)}>
-                                                <option value="ne_pritje">Ne Pritje</option>
-                                                <option value="ne_pergatitje">Ne Pergatitje</option>
-                                                <option value="gati">Gati</option>
-                                                <option value="ne_dergim">Ne Dergim</option>
-                                                <option value="dorezuar">Dorezuar</option>
-                                                <option value="anuluar">Anuluar</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <button className="btn btn-sm btn-outline-info me-1" onClick={() => viewDetails(p.porosi_id)}><FaEye /></button>
-                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.porosi_id)}><FaTrash /></button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr><td colSpan="7" className="text-center text-muted">Nuk ka porosi ende</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                    {loading ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-danger" role="status">
+                                <span className="visually-hidden">Duke u ngarkuar...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <table className="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Klienti</th>
+                                    <th>Data</th>
+                                    <th>Totali</th>
+                                    <th>Pagesa</th>
+                                    <th>Statusi</th>
+                                    <th>Veprimet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {porosite.length > 0 ? (
+                                    porosite.map((p) => (
+                                        <tr key={p.porosi_id}>
+                                            <td>#{p.porosi_id}</td>
+                                            <td>{p.emri} {p.mbiemri}</td>
+                                            <td>{new Date(p.data_porosise).toLocaleDateString('sq-AL')}</td>
+                                            <td>{p.totali} €</td>
+                                            <td>{p.metoda_pageses}</td>
+                                            <td>
+                                                <select className="form-select form-select-sm" style={{ width: '140px' }} value={p.statusi} onChange={(e) => handleStatusChange(p.porosi_id, e.target.value)}>
+                                                    <option value="ne_pritje">Ne Pritje</option>
+                                                    <option value="ne_pergatitje">Ne Pergatitje</option>
+                                                    <option value="gati">Gati</option>
+                                                    <option value="ne_dergim">Ne Dergim</option>
+                                                    <option value="dorezuar">Dorezuar</option>
+                                                    <option value="anuluar">Anuluar</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline-info me-1" onClick={() => viewDetails(p.porosi_id)}><FaEye /></button>
+                                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(p.porosi_id)}><FaTrash /></button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan="7" className="text-center text-muted">Nuk ka porosi te gjetura</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
         </div>
