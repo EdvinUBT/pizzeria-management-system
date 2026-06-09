@@ -68,6 +68,9 @@ const Navbar = () => {
                                     <li className="nav-item">
                                         <Link className="nav-link" to="/adresat">Adresat</Link>
                                     </li>
+                                    <li className="nav-item">
+                                        <Link className="nav-link" to="/raportet">Raportet</Link>
+                                    </li>
                                     {(isAdmin() || isMenaxher()) && (
                                         <li className="nav-item dropdown" style={{ position: 'relative' }}>
                                             <a className="nav-link dropdown-toggle" href="#!" role="button"

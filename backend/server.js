@@ -103,6 +103,8 @@ const notificationsRoutes = require('./routes/notificationsRoutes');
 
 const exportImportRoutes = require('./routes/exportImportRoutes');
 
+const reportsRoutes = require('./routes/reportsRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -154,6 +156,8 @@ app.use('/api/audit-logs', auditLogsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 
 app.use('/api', exportImportRoutes);
+
+app.use('/api/reports', reportsRoutes);
 
 // Socket.IO konfigurimi
 const http = require('http');

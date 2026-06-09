@@ -27,6 +27,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Perberesit = lazy(() => import('./pages/Perberesit'));
 const ProduktPerberesit = lazy(() => import('./pages/ProduktPerberesit'));
 const Adresat = lazy(() => import('./pages/Adresat'));
+const Raportet = lazy(() => import('./pages/Raportet'));
 
 const Loading = () => (
   <div className="d-flex justify-content-center align-items-center vh-100">
@@ -108,6 +109,7 @@ const AppContent = () => {
             <Route path="/perberesit" element={<AdminRoute><Perberesit /></AdminRoute>} />
             <Route path="/produkt-perberesit" element={<AdminRoute><ProduktPerberesit /></AdminRoute>} />
             <Route path="/adresat" element={<AdminRoute><Adresat /></AdminRoute>} />
+            <Route path="/raportet" element={<AdminRoute><Raportet /></AdminRoute>} />
             <Route path="/users" element={<AdminOnlyRoute><Users /></AdminOnlyRoute>} />
             <Route path="/roles" element={<AdminOnlyRoute><Roles /></AdminOnlyRoute>} />
 
