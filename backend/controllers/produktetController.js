@@ -1,107 +1,84 @@
-const db = require('../config/db');
+const produktetService = require('../services/produktetService');
 
 // Merr te gjitha produktet
 const getProduktet = async (req, res) => {
     try {
-        const [rows] = await db.query(`
-            SELECT p.*, k.emri_kategorise 
-            FROM produktet p
-            LEFT JOIN kategorite k ON p.kategori_id = k.kategori_id
-            ORDER BY p.produkt_id DESC
-        `);
-        res.json({ sukses: true, te_dhena: rows });
+        const te_dhena = await produktetService.getAll();
+        res.json({ sukses: true, te_dhena });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
 // Merr nje produkt sipas ID
 const getProdukti = async (req, res) => {
     try {
-        const [rows] = await db.query(`
-            SELECT p.*, k.emri_kategorise 
-            FROM produktet p
-            LEFT JOIN kategorite k ON p.kategori_id = k.kategori_id
-            WHERE p.produkt_id = ?
-        `, [req.params.id]);
-
-        if (rows.length === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Produkti nuk u gjet!' });
-        }
-        res.json({ sukses: true, te_dhena: rows[0] });
+        const te_dhena = await produktetService.getById(req.params.id);
+        res.json({ sukses: true, te_dhena });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
 // Merr produktet sipas kategorise
 const getProduktetSipasKategorise = async (req, res) => {
     try {
-        const [rows] = await db.query(`
-            SELECT p.*, k.emri_kategorise 
-            FROM produktet p
-            LEFT JOIN kategorite k ON p.kategori_id = k.kategori_id
-            WHERE p.kategori_id = ?
-            ORDER BY p.emri_produktit ASC
-        `, [req.params.kategoriId]);
-        res.json({ sukses: true, te_dhena: rows });
+        const te_dhena = await produktetService.getByKategori(req.params.kategoriId);
+        res.json({ sukses: true, te_dhena });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
 // Krijo nje produkt te ri
 const krijoProdukt = async (req, res) => {
     try {
-        const { kategori_id, emri_produktit, pershkrimi, cmimi_baze, foto_url, aktive, koha_pergatitjes_min } = req.body;
-        const [result] = await db.query(
-            'INSERT INTO produktet (kategori_id, emri_produktit, pershkrimi, cmimi_baze, foto_url, aktive, koha_pergatitjes_min) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [kategori_id, emri_produktit, pershkrimi, cmimi_baze, foto_url, aktive !== undefined ? aktive : true, koha_pergatitjes_min || 0]
-        );
+        const produkti = await produktetService.create(req.body, req.user?.id);
         res.status(201).json({
             sukses: true,
             mesazhi: 'Produkti u krijua me sukses!',
-            produkt_id: result.insertId
+            produkt_id: produkti.produkt_id
         });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
 // Perditeso nje produkt
 const perditesoProdukt = async (req, res) => {
     try {
-        const { kategori_id, emri_produktit, pershkrimi, cmimi_baze, foto_url, aktive, koha_pergatitjes_min } = req.body;
-        const [result] = await db.query(
-            'UPDATE produktet SET kategori_id = ?, emri_produktit = ?, pershkrimi = ?, cmimi_baze = ?, foto_url = ?, aktive = ?, koha_pergatitjes_min = ? WHERE produkt_id = ?',
-            [kategori_id, emri_produktit, pershkrimi, cmimi_baze, foto_url, aktive, koha_pergatitjes_min, req.params.id]
-        );
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Produkti nuk u gjet!' });
-        }
+        await produktetService.update(req.params.id, req.body, req.user?.id);
         res.json({ sukses: true, mesazhi: 'Produkti u perditesua me sukses!' });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
 // Fshi nje produkt
 const fshiProdukt = async (req, res) => {
     try {
-        const [result] = await db.query('DELETE FROM produktet WHERE produkt_id = ?', [req.params.id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Produkti nuk u gjet!' });
-        }
+        await produktetService.delete(req.params.id);
         res.json({ sukses: true, mesazhi: 'Produkti u fshi me sukses!' });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
-module.exports = { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt };
+// Kerkim i avancuar
+const searchProduktet = async (req, res) => {
+    try {
+        const te_dhena = await produktetService.search(req.query);
+        res.json({ sukses: true, te_dhena });
+    } catch (error) {
+        console.error('Gabim:', error);
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
+    }
+};
+
+module.exports = { getProduktet, getProdukti, getProduktetSipasKategorise, krijoProdukt, perditesoProdukt, fshiProdukt, searchProduktet };

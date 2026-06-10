@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <title>ERD — Pizzeria Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background: #fff; }
+        h1 { color: #D32F2F; text-align: center; }
+        h2 { color: #333; text-align: center; margin-bottom: 5px; }
+        p.sub { text-align: center; color: #666; margin-top: 0; }
+        .mermaid { display: flex; justify-content: center; overflow-x: auto; }
+        .legend { max-width: 800px; margin: 30px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .legend h3 { color: #D32F2F; }
+        .legend table { width: 100%; border-collapse: collapse; }
+        .legend th, .legend td { padding: 6px 12px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
+        .legend th { background: #D32F2F; color: white; }
+        .section { margin: 20px auto; max-width: 900px; }
+        .section h3 { color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 5px; }
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+    <h1>Entity Relationship Diagram (ERD)</h1>
+    <h2>Sistemi per Menaxhimin e Picerise</h2>
+    <p class="sub">26 Tabela SQL + 2 Koleksione MongoDB | MERN Stack | UBT Lab Course 2</p>
+
+    <div class="mermaid">
+erDiagram
+    users {
+        int id PK
+        varchar emri
+        varchar mbiemri
+        varchar email UK
+        varchar password_hash
+        varchar phone_number
+        boolean email_confirmed
+        boolean lockout_enabled
+        int access_failed_count
+        enum statusi
+        datetime created_at
+        datetime updated_at
+    }
+
+    roles {
+        int id PK
+        varchar emertimi UK
+        text pershkrimi
+        varchar normalized_name UK
+        datetime created_at
+    }
+
+    user_roles {
+        int id PK
+        int user_id FK
+        int role_id FK
+        datetime created_at
+    }
+
+    permissions {
+        int id PK
+        varchar name UK
+        text description
+        datetime created_at
+    }
+
+    role_permissions {
+        int id PK
+        int role_id FK
+        int permission_id FK
+    }
+
+    refresh_tokens {
+        int id PK
+        int user_id FK
+        varchar token
+        datetime expires
+        datetime revoked
+    }
+
+    user_claims {
+        int id PK
+        int user_id FK
+        varchar claim_type
+        text claim_value
+    }
+
+    user_tokens {
+        int id PK
+        int user_id FK
+        varchar login_provider
+        varchar token_name
+        text token_value
+    }
+
+    kategorite {
+        int kategori_id PK
+        varchar emri_kategorise
+        text pershkrimi
+        int renditja
+        boolean aktive
+    }
+
+    produktet {
+        int produkt_id PK
+        int kategori_id FK
+        varchar emri_produktit
+        text pershkrimi
+        decimal cmimi_baze
+        varchar foto_url
+        boolean aktive
+        int koha_pergatitjes_min
+    }
+
+    perberesit {
+        int perberes_id PK
+        varchar emri_perberesit
+        varchar njesia_matese
+        decimal sasia_stok
+        decimal cmimi_shtese
+        varchar alergjene
+    }
+
+    produkt_perberesit {
+        int produkt_perberes_id PK
+        int produkt_id FK
+        int perberes_id FK
+        decimal sasia_standarde
+        boolean eshte_opsionale
+    }
+
+    klientet {
+        int klient_id PK
+        varchar emri
+        varchar mbiemri
+        varchar email UK
+        varchar telefoni
+        text adresa
+        datetime data_regjistrimit
+    }
+
+    porosite {
+        int porosi_id PK
+        int klient_id FK
+        datetime data_porosise
+        enum statusi
+        decimal totali
+        enum metoda_pageses
+        text adresa_dergeses
+        text shenimet
+    }
+
+    detajet_porosise {
+        int detaj_id PK
+        int porosi_id FK
+        int produkt_id FK
+        int sasia
+        decimal cmimi_njesi
+        text personalizimi
+        decimal nentotali
+    }
+
+    punonjesit {
+        int punonjes_id PK
+        varchar emri
+        varchar mbiemri
+        enum roli
+        varchar telefoni
+        varchar email
+        boolean aktiv
+    }
+
+    dergesat {
+        int dergese_id PK
+        int porosi_id FK
+        int punonjes_id FK
+        datetime koha_nisjes
+        datetime koha_dergeses
+        enum statusi
+        text adresa
+    }
+
+    menyte {
+        int meny_id PK
+        varchar emri_menys
+        text pershkrimi
+        date data_fillimit
+        date data_mbarimit
+        boolean aktive
+    }
+
+    meny_produktet {
+        int meny_produkt_id PK
+        int meny_id FK
+        int produkt_id FK
+        decimal cmimi_special
+        int renditja
+    }
+
+    vleresimet {
+        int vleresim_id PK
+        int klient_id FK
+        int porosi_id FK
+        int yjet
+        text komenti
+        datetime data_vleresimit
+    }
+
+    kuponat {
+        int kupon_id PK
+        varchar kodi UK
+        decimal zbritja_perqind
+        decimal zbritja_max
+        decimal porosi_min
+        date data_fillimit
+        date data_skadimit
+        int perdorimet_max
+        int perdorimet_aktuale
+        boolean aktiv
+    }
+
+    adresat {
+        int adrese_id PK
+        int klient_id FK
+        varchar emertimi
+        text adresa
+        varchar qyteti
+        varchar kodi_postar
+        boolean eshte_default
+    }
+
+    audit_logs {
+        int id PK
+        int user_id FK
+        varchar action
+        varchar entity
+        int entity_id
+        json old_value
+        json new_value
+        varchar ip_address
+        datetime created_at
+    }
+
+    notifications {
+        int id PK
+        int user_id FK
+        varchar type
+        varchar title
+        text message
+        boolean is_read
+        datetime created_at
+    }
+
+    settings {
+        int id PK
+        varchar key UK
+        text value
+        text description
+        datetime updated_at
+    }
+
+    files {
+        int id PK
+        varchar entity
+        int entity_id
+        varchar filename
+        varchar file_path
+        int file_size
+        int uploaded_by FK
+        datetime created_at
+    }
+
+    users ||--o{ user_roles : "ka"
+    roles ||--o{ user_roles : "ka"
+    users ||--o{ refresh_tokens : "ka"
+    users ||--o{ user_claims : "ka"
+    users ||--o{ user_tokens : "ka"
+    users ||--o{ audit_logs : "regjistron"
+    users ||--o{ notifications : "merr"
+    users ||--o{ files : "ngarkon"
+    roles ||--o{ role_permissions : "ka"
+    permissions ||--o{ role_permissions : "ka"
+    kategorite ||--o{ produktet : "permban"
+    produktet ||--o{ produkt_perberesit : "ka"
+    perberesit ||--o{ produkt_perberesit : "ka"
+    produktet ||--o{ detajet_porosise : "ka"
+    produktet ||--o{ meny_produktet : "ka"
+    klientet ||--o{ porosite : "ben"
+    klientet ||--o{ vleresimet : "jep"
+    klientet ||--o{ adresat : "ka"
+    porosite ||--o{ detajet_porosise : "permban"
+    porosite ||--o{ dergesat : "ka"
+    porosite ||--o{ vleresimet : "merr"
+    punonjesit ||--o{ dergesat : "dergon"
+    menyte ||--o{ meny_produktet : "permban"
+    </div>
+
+    <div class="legend">
+        <h3>Legenda</h3>
+        <table>
+            <tr><th>Grupi</th><th>Tabelat</th><th>Numri</th></tr>
+            <tr><td>Sistemi i Identitetit</td><td>users, roles, user_roles, permissions, role_permissions, refresh_tokens, user_claims, user_tokens</td><td>8</td></tr>
+            <tr><td>Picerise (Core)</td><td>kategorite, produktet, perberesit, produkt_perberesit, klientet, porosite, detajet_porosise, punonjesit, dergesat, menyte, meny_produktet, vleresimet</td><td>12</td></tr>
+            <tr><td>Shtese</td><td>kuponat, adresat, audit_logs, notifications, settings, files</td><td>6</td></tr>
+            <tr><td colspan="2"><strong>TOTAL SQL</strong></td><td><strong>26</strong></td></tr>
+        </table>
+        <br>
+        <table>
+            <tr><th>NoSQL (MongoDB)</th><th>Pershkrimi</th></tr>
+            <tr><td>AuditLog</td><td>Regjistrim veprimi (aksioni, entiteti, vlerat e vjetra/reja, IP)</td></tr>
+            <tr><td>Notification</td><td>Njoftime real-time per perdoruesit</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Relacionet Kryesore</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <tr style="background:#1976D2; color:white;"><th style="padding:8px; border:1px solid #ddd;">Relacioni</th><th style="padding:8px; border:1px solid #ddd;">Tipi</th><th style="padding:8px; border:1px solid #ddd;">Pershkrimi</th></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">users — roles</td><td style="padding:6px; border:1px solid #ddd;">N:M</td><td style="padding:6px; border:1px solid #ddd;">Permes user_roles</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">roles — permissions</td><td style="padding:6px; border:1px solid #ddd;">N:M</td><td style="padding:6px; border:1px solid #ddd;">Permes role_permissions</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">kategorite — produktet</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje kategori ka shume produkte</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">produktet — perberesit</td><td style="padding:6px; border:1px solid #ddd;">N:M</td><td style="padding:6px; border:1px solid #ddd;">Permes produkt_perberesit</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">klientet — porosite</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje klient ben shume porosi</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">porosite — detajet_porosise</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje porosi ka shume artikuj</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">porosite — dergesat</td><td style="padding:6px; border:1px solid #ddd;">1:1</td><td style="padding:6px; border:1px solid #ddd;">Nje porosi ka nje dergese</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">punonjesit — dergesat</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje shofer ben shume dergesa</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">menyte — produktet</td><td style="padding:6px; border:1px solid #ddd;">N:M</td><td style="padding:6px; border:1px solid #ddd;">Permes meny_produktet</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">klientet — vleresimet</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje klient jep shume vleresime</td></tr>
+            <tr><td style="padding:6px; border:1px solid #ddd;">klientet — adresat</td><td style="padding:6px; border:1px solid #ddd;">1:N</td><td style="padding:6px; border:1px solid #ddd;">Nje klient ka shume adresa</td></tr>
+        </table>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            er: { 
+                diagramPadding: 20,
+                layoutDirection: 'TB',
+                minEntityWidth: 100,
+                minEntityHeight: 75,
+                entityPadding: 15,
+                useMaxWidth: false
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <title>ERD — Pizzeria Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        .header { background: #D32F2F; color: white; padding: 15px 20px; text-align: center; }
+        .header h1 { font-size: 22px; margin-bottom: 4px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        .controls { background: #fff; border-bottom: 1px solid #ddd; padding: 8px 20px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .controls button { padding: 6px 14px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 14px; }
+        .controls button:hover { background: #eee; }
+        .controls span { font-size: 13px; color: #666; }
+        .diagram-container { overflow: hidden; cursor: grab; background: #fff; margin: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; height: calc(100vh - 200px); }
+        .diagram-container:active { cursor: grabbing; }
+        .diagram-inner { transform-origin: 0 0; transition: transform 0.1s ease; }
+        .mermaid { padding: 30px; display: inline-block; }
+        .legend-container { margin: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .legend-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 15px; flex: 1; min-width: 300px; }
+        .legend-card h3 { color: #D32F2F; margin-bottom: 10px; font-size: 15px; }
+        .legend-card table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .legend-card th { background: #D32F2F; color: white; padding: 6px 8px; text-align: left; }
+        .legend-card td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+        .info { background: #E3F2FD; color: #1565C0; padding: 8px 20px; font-size: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Entity Relationship Diagram (ERD)</h1>
+        <p>Sistemi per Menaxhimin e Picerise — 26 Tabela SQL + 2 Koleksione MongoDB — UBT Lab Course 2</p>
+    </div>
+    <div class="info">Scroll per zoom in/out | Kliko dhe terheq per te levizur | Butonat + / - per zoom</div>
+    <div class="controls">
+        <button onclick="zoomIn()">+ Zoom In</button>
+        <button onclick="zoomOut()">- Zoom Out</button>
+        <button onclick="resetZoom()">Reset</button>
+        <button onclick="fitToScreen()">Fit</button>
+        <span id="zoomLevel">100%</span>
+    </div>
+
+    <div class="diagram-container" id="container">
+        <div class="diagram-inner" id="inner">
+            <div class="mermaid">
+erDiagram
+    users {
+        int id PK
+        varchar emri
+        varchar mbiemri
+        varchar email UK
+        varchar password_hash
+        varchar phone_number
+        boolean email_confirmed
+        boolean lockout_enabled
+        int access_failed_count
+        enum statusi
+        datetime created_at
+        datetime updated_at
+    }
+
+    roles {
+        int id PK
+        varchar emertimi UK
+        text pershkrimi
+        varchar normalized_name UK
+        datetime created_at
+    }
+
+    user_roles {
+        int id PK
+        int user_id FK
+        int role_id FK
+        datetime created_at
+    }
+
+    permissions {
+        int id PK
+        varchar name UK
+        text description
+        datetime created_at
+    }
+
+    role_permissions {
+        int id PK
+        int role_id FK
+        int permission_id FK
+    }
+
+    refresh_tokens {
+        int id PK
+        int user_id FK
+        varchar token
+        datetime expires
+        datetime revoked
+    }
+
+    user_claims {
+        int id PK
+        int user_id FK
+        varchar claim_type
+        text claim_value
+    }
+
+    user_tokens {
+        int id PK
+        int user_id FK
+        varchar login_provider
+        varchar token_name
+        text token_value
+    }
+
+    kategorite {
+        int kategori_id PK
+        varchar emri_kategorise
+        text pershkrimi
+        int renditja
+        boolean aktive
+    }
+
+    produktet {
+        int produkt_id PK
+        int kategori_id FK
+        varchar emri_produktit
+        text pershkrimi
+        decimal cmimi_baze
+        varchar foto_url
+        boolean aktive
+        int koha_pergatitjes_min
+    }
+
+    perberesit {
+        int perberes_id PK
+        varchar emri_perberesit
+        varchar njesia_matese
+        decimal sasia_stok
+        decimal cmimi_shtese
+        varchar alergjene
+    }
+
+    produkt_perberesit {
+        int produkt_perberes_id PK
+        int produkt_id FK
+        int perberes_id FK
+        decimal sasia_standarde
+        boolean eshte_opsionale
+    }
+
+    klientet {
+        int klient_id PK
+        varchar emri
+        varchar mbiemri
+        varchar email UK
+        varchar telefoni
+        text adresa
+        datetime data_regjistrimit
+    }
+
+    porosite {
+        int porosi_id PK
+        int klient_id FK
+        datetime data_porosise
+        enum statusi
+        decimal totali
+        enum metoda_pageses
+        text adresa_dergeses
+        text shenimet
+    }
+
+    detajet_porosise {
+        int detaj_id PK
+        int porosi_id FK
+        int produkt_id FK
+        int sasia
+        decimal cmimi_njesi
+        text personalizimi
+        decimal nentotali
+    }
+
+    punonjesit {
+        int punonjes_id PK
+        varchar emri
+        varchar mbiemri
+        enum roli
+        varchar telefoni
+        varchar email
+        boolean aktiv
+    }
+
+    dergesat {
+        int dergese_id PK
+        int porosi_id FK
+        int punonjes_id FK
+        datetime koha_nisjes
+        datetime koha_dergeses
+        enum statusi
+        text adresa
+    }
+
+    menyte {
+        int meny_id PK
+        varchar emri_menys
+        text pershkrimi
+        date data_fillimit
+        date data_mbarimit
+        boolean aktive
+    }
+
+    meny_produktet {
+        int meny_produkt_id PK
+        int meny_id FK
+        int produkt_id FK
+        decimal cmimi_special
+        int renditja
+    }
+
+    vleresimet {
+        int vleresim_id PK
+        int klient_id FK
+        int porosi_id FK
+        int yjet
+        text komenti
+        datetime data_vleresimit
+    }
+
+    kuponat {
+        int kupon_id PK
+        varchar kodi UK
+        decimal zbritja_perqind
+        decimal zbritja_max
+        decimal porosi_min
+        date data_fillimit
+        date data_skadimit
+        int perdorimet_max
+        int perdorimet_aktuale
+        boolean aktiv
+    }
+
+    adresat {
+        int adrese_id PK
+        int klient_id FK
+        varchar emertimi
+        text adresa
+        varchar qyteti
+        varchar kodi_postar
+        boolean eshte_default
+    }
+
+    audit_logs {
+        int id PK
+        int user_id FK
+        varchar action
+        varchar entity
+        int entity_id
+        json old_value
+        json new_value
+        varchar ip_address
+        datetime created_at
+    }
+
+    notifications {
+        int id PK
+        int user_id FK
+        varchar type
+        varchar title
+        text message
+        boolean is_read
+        datetime created_at
+    }
+
+    settings {
+        int id PK
+        varchar key UK
+        text value
+        text description
+        datetime updated_at
+    }
+
+    files {
+        int id PK
+        varchar entity
+        int entity_id
+        varchar filename
+        varchar file_path
+        int file_size
+        int uploaded_by FK
+        datetime created_at
+    }
+
+    users ||--o{ user_roles : "ka"
+    roles ||--o{ user_roles : "ka"
+    users ||--o{ refresh_tokens : "ka"
+    users ||--o{ user_claims : "ka"
+    users ||--o{ user_tokens : "ka"
+    users ||--o{ audit_logs : "regjistron"
+    users ||--o{ notifications : "merr"
+    users ||--o{ files : "ngarkon"
+    roles ||--o{ role_permissions : "ka"
+    permissions ||--o{ role_permissions : "ka"
+    kategorite ||--o{ produktet : "permban"
+    produktet ||--o{ produkt_perberesit : "ka"
+    perberesit ||--o{ produkt_perberesit : "ka"
+    produktet ||--o{ detajet_porosise : "ka"
+    produktet ||--o{ meny_produktet : "ka"
+    klientet ||--o{ porosite : "ben"
+    klientet ||--o{ vleresimet : "jep"
+    klientet ||--o{ adresat : "ka"
+    porosite ||--o{ detajet_porosise : "permban"
+    porosite ||--o{ dergesat : "ka"
+    porosite ||--o{ vleresimet : "merr"
+    punonjesit ||--o{ dergesat : "dergon"
+    menyte ||--o{ meny_produktet : "permban"
+            </div>
+        </div>
+    </div>
+
+    <div class="legend-container">
+        <div class="legend-card">
+            <h3>Grupet e Tabelave (SQL — 26 total)</h3>
+            <table>
+                <tr><th>Grupi</th><th>Tabelat</th><th>#</th></tr>
+                <tr><td>Identiteti</td><td>users, roles, user_roles, permissions, role_permissions, refresh_tokens, user_claims, user_tokens</td><td>8</td></tr>
+                <tr><td>Picerise</td><td>kategorite, produktet, perberesit, produkt_perberesit, klientet, porosite, detajet_porosise, punonjesit, dergesat, menyte, meny_produktet, vleresimet</td><td>12</td></tr>
+                <tr><td>Shtese</td><td>kuponat, adresat, audit_logs, notifications, settings, files</td><td>6</td></tr>
+            </table>
+        </div>
+        <div class="legend-card">
+            <h3>Koleksionet MongoDB (NoSQL — 2 total)</h3>
+            <table>
+                <tr><th>Koleksioni</th><th>Pershkrimi</th></tr>
+                <tr><td>AuditLog</td><td>Regjistrim veprimi — aksioni, entiteti, vlerat e vjetra/reja, IP adresa</td></tr>
+                <tr><td>Notification</td><td>Njoftime real-time per perdoruesit — tipi, titulli, mesazhi, is_read</td></tr>
+            </table>
+            <br>
+            <h3>Relacionet N:M</h3>
+            <table>
+                <tr><th>Relacioni</th><th>Tabela Ndermjetese</th></tr>
+                <tr><td>users - roles</td><td>user_roles</td></tr>
+                <tr><td>roles - permissions</td><td>role_permissions</td></tr>
+                <tr><td>produktet - perberesit</td><td>produkt_perberesit</td></tr>
+                <tr><td>menyte - produktet</td><td>meny_produktet</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            er: { 
+                diagramPadding: 20,
+                layoutDirection: 'TB',
+                minEntityWidth: 100,
+                minEntityHeight: 75,
+                entityPadding: 15,
+                useMaxWidth: false
+            }
+        });
+
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        const container = document.getElementById('container');
+        const inner = document.getElementById('inner');
+
+        function updateTransform() {
+            inner.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')';
+            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
+        }
+
+        function zoomIn() {
+            scale = Math.min(scale + 0.15, 4);
+            updateTransform();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale - 0.15, 0.2);
+            updateTransform();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        function fitToScreen() {
+            var mermaidEl = document.querySelector('.mermaid svg');
+            if (mermaidEl) {
+                var containerRect = container.getBoundingClientRect();
+                var svgRect = mermaidEl.getBoundingClientRect();
+                var scaleX = containerRect.width / (svgRect.width / scale);
+                var scaleY = containerRect.height / (svgRect.height / scale);
+                scale = Math.min(scaleX, scaleY) * 0.9;
+                translateX = 0;
+                translateY = 0;
+                updateTransform();
+            }
+        }
+
+        container.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            var delta = e.deltaY > 0 ? -0.08 : 0.08;
+            scale = Math.max(0.2, Math.min(4, scale + delta));
+            updateTransform();
+        });
+
+        container.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            container.style.cursor = 'grabbing';
+        });
+
+        container.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            inner.style.transition = 'none';
+            updateTransform();
+        });
+
+        container.addEventListener('mouseup', function() {
+            isDragging = false;
+            container.style.cursor = 'grab';
+            inner.style.transition = 'transform 0.1s ease';
+        });
+
+        container.addEventListener('mouseleave', function() {
+            isDragging = false;
+            container.style.cursor = 'grab';
+            inner.style.transition = 'transform 0.1s ease';
+        });
+    </script>
+</body>
+</html>

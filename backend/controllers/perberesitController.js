@@ -1,78 +1,56 @@
-const db = require('../config/db');
+const perberesitService = require('../services/perberesitService');
 
-// Merr te gjithe perberesit
 const getPerberesit = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM perberesit ORDER BY emri_perberesit ASC');
-        res.json({ sukses: true, te_dhena: rows });
+        const te_dhena = await perberesitService.getAll();
+        res.json({ sukses: true, te_dhena });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
-// Merr nje perberes sipas ID
 const getPerberesi = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM perberesit WHERE perberes_id = ?', [req.params.id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Perberesi nuk u gjet!' });
-        }
-        res.json({ sukses: true, te_dhena: rows[0] });
+        const te_dhena = await perberesitService.getById(req.params.id);
+        res.json({ sukses: true, te_dhena });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
-// Krijo nje perberes te ri
 const krijoPerberes = async (req, res) => {
     try {
-        const { emri_perberesit, njesia_matese, sasia_stok, cmimi_shtese, alergjene } = req.body;
-        const [result] = await db.query(
-            'INSERT INTO perberesit (emri_perberesit, njesia_matese, sasia_stok, cmimi_shtese, alergjene) VALUES (?, ?, ?, ?, ?)',
-            [emri_perberesit, njesia_matese, sasia_stok || 0, cmimi_shtese || 0, alergjene]
-        );
+        const perberesi = await perberesitService.create(req.body, req.user?.id);
         res.status(201).json({
             sukses: true,
             mesazhi: 'Perberesi u krijua me sukses!',
-            perberes_id: result.insertId
+            perberes_id: perberesi.perberes_id
         });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
-// Perditeso nje perberes
 const perditesoPerberes = async (req, res) => {
     try {
-        const { emri_perberesit, njesia_matese, sasia_stok, cmimi_shtese, alergjene } = req.body;
-        const [result] = await db.query(
-            'UPDATE perberesit SET emri_perberesit = ?, njesia_matese = ?, sasia_stok = ?, cmimi_shtese = ?, alergjene = ? WHERE perberes_id = ?',
-            [emri_perberesit, njesia_matese, sasia_stok, cmimi_shtese, alergjene, req.params.id]
-        );
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Perberesi nuk u gjet!' });
-        }
+        await perberesitService.update(req.params.id, req.body, req.user?.id);
         res.json({ sukses: true, mesazhi: 'Perberesi u perditesua me sukses!' });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 
-// Fshi nje perberes
 const fshiPerberes = async (req, res) => {
     try {
-        const [result] = await db.query('DELETE FROM perberesit WHERE perberes_id = ?', [req.params.id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ sukses: false, mesazhi: 'Perberesi nuk u gjet!' });
-        }
+        await perberesitService.delete(req.params.id);
         res.json({ sukses: true, mesazhi: 'Perberesi u fshi me sukses!' });
     } catch (error) {
         console.error('Gabim:', error);
-        res.status(500).json({ sukses: false, mesazhi: 'Gabim ne server' });
+        res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });
     }
 };
 

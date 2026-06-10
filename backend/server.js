@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const db = require('./config/db');
 const createTables = require('./models/database');
+const connectMongoDB = require('./config/mongodb');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -96,6 +97,14 @@ const userTokensRoutes = require('./routes/userTokensRoutes');
 
 const klientPaneliRoutes = require('./routes/klientPaneliRoutes');
 
+const auditLogsRoutes = require('./routes/auditLogsRoutes');
+
+const notificationsRoutes = require('./routes/notificationsRoutes');
+
+const exportImportRoutes = require('./routes/exportImportRoutes');
+
+const reportsRoutes = require('./routes/reportsRoutes');
+
 // Rruga testuese
 app.get('/', (req, res) => {
     res.json({ mesazhi: 'Mire se vini ne API-n e Picerise!' });
@@ -142,10 +151,54 @@ app.use('/api/user-tokens', userTokensRoutes);
 
 app.use('/api/klient-paneli', klientPaneliRoutes);
 
+app.use('/api/audit-logs', auditLogsRoutes);
+
+app.use('/api/notifications', notificationsRoutes);
+
+app.use('/api', exportImportRoutes);
+
+app.use('/api/reports', reportsRoutes);
+
+// Socket.IO konfigurimi
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:3000',
+        credentials: true
+    }
+});
+
+// Ruaj io instance per perdorim global
+app.set('io', io);
+
+// Socket.IO lidhjet
+io.on('connection', (socket) => {
+    console.log('Perdorues i lidhur:', socket.id);
+
+    // Perdoruesi bashkohet ne dhomat e tij
+    socket.on('join', (userId) => {
+        socket.join(`user_${userId}`);
+        console.log(`Perdoruesi ${userId} u bashkua ne dhomen user_${userId}`);
+    });
+
+    socket.on('join_admin', () => {
+        socket.join('admin_room');
+        console.log('Admin u bashkua ne admin_room');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Perdorues i shkeputur:', socket.id);
+    });
+});
+
 // Porti nga .env ose 5000
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
     console.log(`Serveri eshte duke u ekzekutuar ne portin ${PORT}`);
     await createTables();
+    await connectMongoDB();
 });

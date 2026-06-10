@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getKlientet, getKlienti, krijoKlient, perditesoKlient, fshiKlient } = require('../controllers/klientetController');
+const { getKlientet, getKlienti, krijoKlient, perditesoKlient, fshiKlient, searchKlientet } = require('../controllers/klientetController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const { validateKlient } = require('../middleware/validateMiddleware');
 
@@ -28,6 +28,45 @@ const { validateKlient } = require('../middleware/validateMiddleware');
  *         description: Nuk keni qasje
  */
 router.get('/', verifyToken, verifyRole('admin', 'menaxher'), getKlientet);
+
+/**
+ * @swagger
+ * /api/klientet/search:
+ *   get:
+ *     summary: Kerkim i avancuar i klienteve
+ *     tags: [Klientet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: data_nga
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: data_deri
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: sort_by
+ *         schema:
+ *           type: string
+ *           enum: [emri, mbiemri, email, data]
+ *       - in: query
+ *         name: sort_order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Rezultatet e kerkimit
+ */
+router.get('/search', verifyToken, verifyRole('admin', 'menaxher'), searchKlientet);
 
 /**
  * @swagger
