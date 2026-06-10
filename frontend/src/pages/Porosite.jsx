@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import socket from '../services/socket';
 import API from '../services/api';
 import { FaPlus, FaEye, FaTrash, FaShoppingCart, FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import ExportImport from '../components/ExportImport';
@@ -35,6 +36,19 @@ const Porosite = () => {
     useEffect(() => {
         fetchKlientet();
         fetchProduktet();
+    }, []);
+
+    // Perditesohu automatikisht kur vjen porosi e re
+    useEffect(() => {
+        const handlePorosiERe = () => {
+            fetchPorosite();
+        };
+
+        socket.on('porosi_e_re', handlePorosiERe);
+
+        return () => {
+            socket.off('porosi_e_re', handlePorosiERe);
+        };
     }, []);
 
     useEffect(() => {

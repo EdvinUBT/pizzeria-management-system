@@ -66,7 +66,7 @@ const NotificationBell = () => {
                     <strong className="text-dark">Njoftimet</strong>
                     {unreadCount > 0 && (
                         <button className="btn btn-sm btn-outline-primary" onClick={markAllAsRead}>
-                            Sheno te gjitha
+                            Pastro
                         </button>
                     )}
                 </div>

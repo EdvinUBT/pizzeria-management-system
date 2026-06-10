@@ -1,23 +1,38 @@
 import { useState, useEffect } from 'react';
 import API from '../services/api';
+import socket from '../services/socket';
 import { FaShoppingCart, FaUsers, FaPizzaSlice, FaMoneyBillWave, FaStar, FaUserTie, FaTruck } from 'react-icons/fa';
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchDashboard = async () => {
+        try {
+            const response = await API.get('/dashboard');
+            setData(response.data.te_dhena);
+        } catch (error) {
+            console.error('Gabim:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                const response = await API.get('/dashboard');
-                setData(response.data.te_dhena);
-            } catch (error) {
-                console.error('Gabim:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchDashboard();
+    }, []);
+
+    // Perditesohu automatikisht kur vjen porosi e re
+    useEffect(() => {
+        const handlePorosiERe = () => {
+            fetchDashboard();
+        };
+
+        socket.on('porosi_e_re', handlePorosiERe);
+
+        return () => {
+            socket.off('porosi_e_re', handlePorosiERe);
+        };
     }, []);
 
     if (loading) {
@@ -193,10 +208,10 @@ const Dashboard = () => {
                                                 <td>{p.totali} €</td>
                                                 <td>
                                                     <span className={`badge ${p.statusi === 'dorezuar' ? 'bg-success' :
-                                                            p.statusi === 'ne_pritje' ? 'bg-warning text-dark' :
-                                                                p.statusi === 'ne_pergatitje' ? 'bg-info' :
-                                                                    p.statusi === 'ne_dergim' ? 'bg-primary' :
-                                                                        p.statusi === 'anuluar' ? 'bg-danger' : 'bg-secondary'
+                                                        p.statusi === 'ne_pritje' ? 'bg-warning text-dark' :
+                                                            p.statusi === 'ne_pergatitje' ? 'bg-info' :
+                                                                p.statusi === 'ne_dergim' ? 'bg-primary' :
+                                                                    p.statusi === 'anuluar' ? 'bg-danger' : 'bg-secondary'
                                                         }`}>
                                                         {p.statusi.replace('_', ' ')}
                                                     </span>
@@ -233,10 +248,10 @@ const Dashboard = () => {
                                             <tr key={index}>
                                                 <td>
                                                     <span className={`badge ${s.statusi === 'dorezuar' ? 'bg-success' :
-                                                            s.statusi === 'ne_pritje' ? 'bg-warning text-dark' :
-                                                                s.statusi === 'ne_pergatitje' ? 'bg-info' :
-                                                                    s.statusi === 'ne_dergim' ? 'bg-primary' :
-                                                                        s.statusi === 'anuluar' ? 'bg-danger' : 'bg-secondary'
+                                                        s.statusi === 'ne_pritje' ? 'bg-warning text-dark' :
+                                                            s.statusi === 'ne_pergatitje' ? 'bg-info' :
+                                                                s.statusi === 'ne_dergim' ? 'bg-primary' :
+                                                                    s.statusi === 'anuluar' ? 'bg-danger' : 'bg-secondary'
                                                         }`}>
                                                         {s.statusi.replace('_', ' ')}
                                                     </span>

@@ -21,6 +21,7 @@ const dergesatService = {
             created_by: userId
         });
 
+        // Kur krijohet dergesa, porosia kalon ne "ne_dergim"
         await dergesatRepository.updatePorosiStatusi(data.porosi_id, 'ne_dergim');
 
         return dergesa;
@@ -32,16 +33,21 @@ const dergesatService = {
             throw { status: 404, message: 'Dergesa nuk u gjet' };
         }
 
-        const updated = await dergesatRepository.updateStatusi(id, statusi, userId);
+        await dergesatRepository.updateStatusi(id, statusi, userId);
 
-        if (statusi === 'dorezuar') {
-            const porosiId = await dergesatRepository.getPorosiId(id);
-            if (porosiId) {
+        // Sinkronizo statusin e porosise sipas statusit te dergeses
+        const porosiId = await dergesatRepository.getPorosiId(id);
+        if (porosiId) {
+            if (statusi === 'ne_rruge') {
+                await dergesatRepository.updatePorosiStatusi(porosiId, 'ne_dergim');
+            } else if (statusi === 'dorezuar') {
                 await dergesatRepository.updatePorosiStatusi(porosiId, 'dorezuar');
+            } else if (statusi === 'deshtuar') {
+                await dergesatRepository.updatePorosiStatusi(porosiId, 'ne_pritje');
             }
         }
 
-        return updated;
+        return true;
     },
 
     delete: async (id) => {
