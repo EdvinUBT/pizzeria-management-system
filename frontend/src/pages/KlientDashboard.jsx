@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import socket from '../services/socket';
 import API from '../services/api';
 import {
     FaPizzaSlice, FaShoppingCart, FaHistory, FaMapMarkerAlt,
@@ -62,6 +63,27 @@ const KlientDashboard = () => {
             fetchAll();
         }
     }, [klientId]);
+
+    // Degjo per ndryshime statusi ne kohe reale
+    useEffect(() => {
+        if (!klientId) return;
+
+        const handleNotification = (notification) => {
+            if (notification.type === 'statusi_porosise') {
+                fetchPorosite();
+                // Nese kemi nje porosi te hapur, rifresko edhe ate
+                if (selectedPorosi) {
+                    shikoPorosi(selectedPorosi.porosi_id);
+                }
+            }
+        };
+
+        socket.on('notification', handleNotification);
+
+        return () => {
+            socket.off('notification', handleNotification);
+        };
+    }, [klientId, selectedPorosi]);
 
     const fetchAll = async () => {
         setLoading(true);

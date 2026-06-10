@@ -1,4 +1,5 @@
 const klientPaneliService = require('../services/klientPaneliService');
+const { sendNotification } = require('../utils/socketHelper');
 
 const getProfilin = async (req, res) => {
     try {
@@ -50,6 +51,14 @@ const krijoPorosi = async (req, res) => {
             totali: rezultati.totali,
             zbritja: rezultati.zbritja
         });
+
+        // Njofto admin-et per porosi te re (Socket.IO)
+        const io = req.app.get('io');
+        io.to('admin_room').emit('porosi_e_re', {
+            porosi_id: rezultati.porosi_id,
+            totali: rezultati.totali
+        });
+
     } catch (error) {
         console.error('Gabim:', error);
         res.status(error.status || 500).json({ sukses: false, mesazhi: error.message || 'Gabim ne server' });

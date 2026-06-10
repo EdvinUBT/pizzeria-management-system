@@ -5,7 +5,15 @@ import socket from '../services/socket';
 
 const NotificationBell = () => {
     const user = useAuthStore(state => state.user);
+    const initSocket = useAuthStore(state => state.initSocket);
     const { notifications, unreadCount, fetchNotifications, fetchUnreadCount, addNotification, markAsRead, markAllAsRead } = useNotificationStore();
+
+    // Sigurohu qe socket-i eshte i lidhur (per rastin kur rifresko faqen)
+    useEffect(() => {
+        if (user) {
+            initSocket();
+        }
+    }, [user]);
 
     useEffect(() => {
         if (user) {

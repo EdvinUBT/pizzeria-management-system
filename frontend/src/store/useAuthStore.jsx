@@ -14,10 +14,12 @@ const useAuthStore = create((set, get) => ({
         set({ user: perdoruesi });
 
         socket.connect();
-        socket.emit('join', perdoruesi.id);
-        if (perdoruesi.roles?.includes('admin') || perdoruesi.roles?.includes('menaxher')) {
-            socket.emit('join_admin');
-        }
+        socket.once('connect', () => {
+            socket.emit('join', perdoruesi.id);
+            if (perdoruesi.roles?.includes('admin') || perdoruesi.roles?.includes('menaxher')) {
+                socket.emit('join_admin');
+            }
+        });
 
         return response.data;
     },
@@ -53,12 +55,14 @@ const useAuthStore = create((set, get) => ({
 
     initSocket: () => {
         const user = get().user;
-        if (user) {
+        if (user && !socket.connected) {
             socket.connect();
-            socket.emit('join', user.id);
-            if (user.roles?.includes('admin') || user.roles?.includes('menaxher')) {
-                socket.emit('join_admin');
-            }
+            socket.once('connect', () => {
+                socket.emit('join', user.id);
+                if (user.roles?.includes('admin') || user.roles?.includes('menaxher')) {
+                    socket.emit('join_admin');
+                }
+            });
         }
     }
 }));

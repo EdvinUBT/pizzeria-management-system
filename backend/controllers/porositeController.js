@@ -1,5 +1,5 @@
 const porositeService = require('../services/porositeService');
-const { sendNotification } = require('../utils/socketHelper');
+const { sendNotification, sendNotificationToKlient } = require('../utils/socketHelper');
 
 const getPorosite = async (req, res) => {
     try {
@@ -58,10 +58,10 @@ const perditesoStatusin = async (req, res) => {
         await porositeService.updateStatusi(req.params.id, req.body.statusi, req.user?.id);
         res.json({ sukses: true, mesazhi: 'Statusi i porosise u perditesua me sukses!' });
 
-        // Merr klient_id nga porosia per ta njoftuar
+        // Merr klient_id nga porosia dhe dergon njoftim me user_id te sakte
         const porosia = await porositeService.getById(req.params.id);
         if (porosia && porosia.klient_id) {
-            await sendNotification(req, porosia.klient_id, {
+            await sendNotificationToKlient(req, porosia.klient_id, {
                 type: 'statusi_porosise',
                 title: 'Statusi i porosise u ndryshua',
                 message: `Porosia #${req.params.id} tani eshte: ${req.body.statusi}`
